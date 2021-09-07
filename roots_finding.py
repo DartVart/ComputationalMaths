@@ -19,14 +19,11 @@ class LineSegment:
     def center(self):
         return (self.right + self.left) / 2
 
-    def to_string(self):
+    def __str__(self):
         return f"[{self.left}, {self.right}]"
 
-    def __str__(self):
-        return self.to_string()
-
     def __repr__(self):
-        return self.to_string()
+        return str(self)
 
 
 def separate_roots(function, line_segment: LineSegment,
