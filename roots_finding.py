@@ -30,7 +30,7 @@ class LineSegment:
         return self.to_string()
 
 
-def separate_roots(function, line_segment: "LineSegment",
+def separate_roots(function, line_segment: LineSegment,
                    number_of_steps: int, variable: str = 'x') -> List[LineSegment]:
     segments = []
     step = line_segment.length / number_of_steps
@@ -49,7 +49,7 @@ def separate_roots(function, line_segment: "LineSegment",
 
 
 class SingleRootSolver:
-    def find_root(self, function, line_segment: "LineSegment", accuracy, variable: str = 'x') -> float:
+    def find_root(self, function, line_segment: LineSegment, accuracy, variable: str = 'x') -> float:
         pass
 
 
@@ -58,7 +58,7 @@ class HalfDivisionSolver(SingleRootSolver):
     def __init__(self):
         self.number_of_iterations = 0
 
-    def find_root(self, function, line_segment: "LineSegment", accuracy, variable: str = 'x') -> float:
+    def find_root(self, function, line_segment: LineSegment, accuracy, variable: str = 'x') -> float:
         self.number_of_iterations = 0
 
         cur_segment = line_segment
