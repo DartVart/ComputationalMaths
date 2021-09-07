@@ -1,6 +1,5 @@
 from typing import List
-
-from sympy import diff
+from abc import ABC, abstractmethod
 from sympy.parsing.sympy_parser import parse_expr
 
 
@@ -48,7 +47,8 @@ def separate_roots(function, line_segment: LineSegment,
     return segments
 
 
-class SingleRootSolver:
+class SingleRootSolver(ABC):
+    @abstractmethod
     def find_root(self, function, line_segment: LineSegment, accuracy, variable: str = 'x') -> float:
         pass
 
