@@ -1,41 +1,53 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, List
+
+from dataclasses import dataclass, field, replace
 from sympy import diff
 
 from config import COMPUTER_DEVIATION
 from line_segment import LineSegment
-
-STEP_PASSED = 'step_passed'
-COMPUTATION_COMPLETED = 'computation_completed'
-INITIAL_VALUE_CHANGED = 'initial_value_changed'
+from root_separator import RootSeparator
 
 
 class SingleRootSolver(ABC):
+    method_name: str
+
+    def __init__(self):
+        self.stat = Statistic()
+
     @abstractmethod
     def find_root(self, function, line_segment: LineSegment, accuracy, variable: str = 'x') -> float:
         pass
 
 
-def default_on_action(action_type, payload=None):
-    if payload is None:
-        payload = {}
+@dataclass
+class Statistic:
+    values: List[float] = field(default_factory=list)
+
+
+@dataclass
+class HalfDivisionStatistic(Statistic):
+    last_segment_length: float = 0.0
 
 
 class HalfDivisionSolver(SingleRootSolver):
-    def __init__(self, on_action=default_on_action):
-        self.on_action = on_action
+    method_name = 'Half division'
 
-    def on_step_passed(self, segment, value):
-        self.on_action(STEP_PASSED, {
-            'segment': segment,
-            'value': value
-        })
+    def __init__(self):
+        super().__init__()
+        self.stat = HalfDivisionStatistic()
+
+    def clear_statistic(self):
+        self.stat.values = []
+        self.stat.last_segment_length = 0
 
     def find_root(self, function, line_segment: LineSegment, accuracy, variable: str = 'x') -> float:
-        step_counter = 0
-        cur_segment = line_segment
+        self.clear_statistic()
 
-        self.on_step_passed(cur_segment, cur_segment.center)
+        step_counter = 0
+        cur_segment = line_segment.copy()
+
+        self.stat.values.append(cur_segment.center)
 
         left_function_value = function.subs({variable: cur_segment.left})
 
@@ -49,22 +61,17 @@ class HalfDivisionSolver(SingleRootSolver):
                 cur_segment.left = cur_segment.center
                 left_function_value = center_function_value
 
-            self.on_step_passed(cur_segment, cur_segment.center)
+            self.stat.values.append(cur_segment.center)
 
-        self.on_action(COMPUTATION_COMPLETED)
+        self.stat.last_segment_length = cur_segment.length
         return cur_segment.center
 
 
 class AccordingToNewtonMethodSolver(SingleRootSolver, ABC):
-    def __init__(self, on_action=default_on_action, max_iterations=100, max_number_of_initial_values=5):
+    def __init__(self, max_iterations=100, max_number_of_initial_values=5):
+        super().__init__()
         self.max_iterations = max_iterations
         self.max_number_of_initial_values = max_number_of_initial_values
-        self.on_action = on_action
-
-    def on_step_passed(self, value):
-        self.on_action(STEP_PASSED, {
-            'value': value
-        })
 
     def find_root(self, function, line_segment: LineSegment, accuracy, variable: str = 'x') -> float:
         initial_value = line_segment.left
@@ -81,10 +88,6 @@ class AccordingToNewtonMethodSolver(SingleRootSolver, ABC):
             if result is not None and result < line_segment.left or result > line_segment.right:
                 result = None
 
-            if result is None:
-                self.on_action(INITIAL_VALUE_CHANGED)
-
-        self.on_action(COMPUTATION_COMPLETED)
         return result
 
     @abstractmethod
@@ -95,14 +98,21 @@ class AccordingToNewtonMethodSolver(SingleRootSolver, ABC):
 
 
 class NewtonMethodSolver(AccordingToNewtonMethodSolver):
+    method_name = 'Newton method'
+
+    def clear_statistic(self):
+        self.stat.values = []
+
     def _find_root_with_initial(self, function, line_segment: LineSegment, accuracy, initial_value,
                                 variable: str = 'x') -> Optional[float]:
+        self.clear_statistic()
+
         step_counter = 0
         prev_value = None
         cur_value = initial_value
         derivative = diff(function)
 
-        self.on_step_passed(cur_value)
+        self.stat.values.append(cur_value)
 
         while prev_value is None or (abs(cur_value - prev_value) > accuracy):
             step_counter += 1
@@ -113,20 +123,27 @@ class NewtonMethodSolver(AccordingToNewtonMethodSolver):
             cur_value = float(
                 prev_value - function.subs({variable: prev_value}) / derivative.subs({variable: prev_value}))
 
-            self.on_step_passed(cur_value)
+            self.stat.values.append(cur_value)
 
         return cur_value
 
 
 class ModifiedNewtonMethodSolver(AccordingToNewtonMethodSolver):
+    method_name = 'Modified Newton method'
+
+    def clear_statistic(self):
+        self.stat.values = []
+
     def _find_root_with_initial(self, function, line_segment: LineSegment, accuracy, initial_value,
                                 variable: str = 'x') -> Optional[float]:
+        self.clear_statistic()
+
         step_counter = 0
         prev_value = None
         cur_value = initial_value
         derivative_value = diff(function).subs({variable: initial_value})
 
-        self.on_step_passed(cur_value)
+        self.stat.values.append(cur_value)
 
         while prev_value is None or (abs(cur_value - prev_value) > accuracy):
             step_counter += 1
@@ -136,23 +153,37 @@ class ModifiedNewtonMethodSolver(AccordingToNewtonMethodSolver):
             prev_value = cur_value
             cur_value = float(prev_value - function.subs({variable: prev_value}) / derivative_value)
 
-            self.on_step_passed(cur_value)
+            self.stat.values.append(cur_value)
 
         return cur_value
 
 
-SECOND_VALUE_INITIALIZING = 'second_value_initializing'
+@dataclass
+class StatisticWithAdditionalInitial(Statistic):
+    additional_value: float = 0.0
 
 
 class SecantLineSolver(AccordingToNewtonMethodSolver):
+    method_name = 'Secant line'
+
+    def clear_statistic(self):
+        self.stat.values = []
+        self.stat.additional_value = 0.0
+
+    def __init__(self):
+        super().__init__()
+        self.stat = StatisticWithAdditionalInitial()
+
     def _find_root_with_initial(self, function, line_segment: LineSegment, accuracy, initial_value,
                                 variable: str = 'x') -> Optional[float]:
+        self.clear_statistic()
+
         step_counter = 0
         prev_value = None
         prev_function_value = None
         cur_value = initial_value
 
-        self.on_step_passed(cur_value)
+        self.stat.values.append(cur_value)
 
         while prev_value is None or (abs(cur_value - prev_value) > accuracy):
             step_counter += 1
@@ -161,7 +192,7 @@ class SecantLineSolver(AccordingToNewtonMethodSolver):
 
             if prev_value is None:
                 prev_prev_value = line_segment.right
-                self.on_action(SECOND_VALUE_INITIALIZING, prev_prev_value)
+                self.stat.additional_value = prev_prev_value
                 prev_prev_function_value = function.subs({variable: prev_prev_value})
             else:
                 prev_prev_value = prev_value
@@ -173,22 +204,31 @@ class SecantLineSolver(AccordingToNewtonMethodSolver):
             cur_value = float(prev_value - prev_function_value * (prev_value - prev_prev_value) / (
                     prev_function_value - prev_prev_function_value))
 
-            self.on_step_passed(cur_value)
+            self.stat.values.append(cur_value)
+            print(abs(cur_value - prev_value))
 
         return cur_value
 
 
+@dataclass
+class SolverStatistic:
+    segments: List[float] = field(default_factory=list)
+    single_solver_statistics: List[Statistic] = field(default_factory=list)
+
+
 class Solver:
-    def __init__(self, single_root_solver, root_separator):
+    def __init__(self, single_root_solver):
         self.single_root_solver = single_root_solver
-        self.root_separator = root_separator
+        self.root_separator = RootSeparator()
+        self.stat = SolverStatistic()
 
     def find_roots(self, function, line_segment, accuracy, number_of_steps, variable: str = 'x'):
-        segments = self.root_separator.separate(function, line_segment, number_of_steps, variable)
+        self.stat.segments = self.root_separator.separate(function, line_segment, number_of_steps, variable)
         roots = []
 
-        for segment in segments:
+        for segment in self.stat.segments:
             root = self.single_root_solver.find_root(function, segment, accuracy, variable)
+            self.stat.single_solver_statistics.append(replace(self.single_root_solver.stat))
             roots.append(float(root))
 
         return roots

@@ -1,158 +1,84 @@
-from typing import List, Dict
+from typing import List
 
-from sympy import diff, lambdify
+from sympy import lambdify
 from sympy.parsing.sympy_parser import parse_expr
 from line_segment import LineSegment
-from root_separator import RootSeparator, NEW_SEGMENT_RECEIVED, CALCULATION_STARTED
-from solvers import STEP_PASSED, COMPUTATION_COMPLETED, HalfDivisionSolver, Solver, NewtonMethodSolver, \
-    INITIAL_VALUE_CHANGED, ModifiedNewtonMethodSolver, SecantLineSolver, SECOND_VALUE_INITIALIZING
+from solvers import HalfDivisionSolver, Solver, NewtonMethodSolver, ModifiedNewtonMethodSolver, SecantLineSolver
 import streamlit as st
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+
+THEME_COLOR = "#ff0067"
 
 
-def get_initial_statistic():
-    return {
-        'step_counter': -1,
-        'segment': [],
-        'value': []
-    }
+def display_segments(segments: List[LineSegment]):
+    for index, segment in enumerate(segments):
+        st.markdown(rf'''$\quad$ {index + 1}. ${segment}$''')
 
+    st.markdown(rf'''$\quad$ Total count: $\;$ ${len(segments)}$''')
 
-def get_on_action(statistics: List[Dict]):
-    if len(statistics) == 0:
-        statistics.append(get_initial_statistic())
-
-    def on_action(action_type, payload=None):
-        if payload is None:
-            payload = {}
-
-        if action_type == STEP_PASSED:
-            statistics[-1]['step_counter'] += 1
-            # statistics[-1]['segment'].append(payload['segment'])
-            statistics[-1]['value'].append(payload['value'])
-        elif action_type == COMPUTATION_COMPLETED:
-            print(statistics[-1])
-            statistics.append(get_initial_statistic())
-        elif action_type == INITIAL_VALUE_CHANGED:
-            statistics[-1] = get_initial_statistic()
-        elif action_type == SECOND_VALUE_INITIALIZING:
-            print(payload)
-
-    return on_action
-
-
-class StatisticHandler:
-    def __init__(self, print_text):
-        self.values = None
-        self.set_initial_statistic()
-        self.print_text = print_text
-
-    def set_initial_statistic(self):
-        self.values = []
-
-    def get_on_action(self, on_start, on_end):
-        def on_action(action_type, payload=None):
-            if payload is None:
-                payload = {}
-
-            if action_type == STEP_PASSED:
-                self.values.append(payload['value'])
-                # self.print_text(f"{len(self.values)}. {payload['value']}")
-            elif action_type == COMPUTATION_COMPLETED:
-                on_end(self.values)
-                self.set_initial_statistic()
-            elif action_type == CALCULATION_STARTED:
-                on_start()
-
-        return on_action
-
-
-class RootSeparatorStatisticHandler:
-    def __init__(self, print_text):
-        self.segments = None
-        self.set_initial_statistic()
-        self.print_text = print_text
-
-    def set_initial_statistic(self):
-        self.segments = []
-
-    def get_on_action(self, on_start, on_end):
-        def on_action(action_type, payload=None):
-            if payload is None:
-                payload = {}
-
-            if action_type == NEW_SEGMENT_RECEIVED:
-                self.segments.append(payload['segment'])
-                self.print_text(f"{len(self.segments)}. {payload['segment']}")
-            elif action_type == COMPUTATION_COMPLETED:
-                on_end(self.segments)
-            elif action_type == CALCULATION_STARTED:
-                on_start()
-
-        return on_action
-
-
-# def get_on_action_2(stremlt, on_end):
-#     def on_action(action_type, payload=None):
-#         if payload is None:
-#             payload = {}
-#
-#         if action_type == NEW_SEGMENT_RECEIVED:
-#             stremlt.text(payload['segment'])
-#         elif action_type == COMPUTATION_COMPLETED:
-#             on_end()
-#
-#     return on_action
-
-def on_start_calc():
-    st.subheader('Separation of roots')
-
-
-def on_end_calc(segments):
-    st.text(f"Total count: {len(segments)}")
-
-    x_min = []
-    x_max = []
-
-    fig, ax = plt.subplots(figsize=(7.0, 0.5))
-    ax.tick_params(left=False, labelleft=False)
-
+    fig = go.Figure()
     for segment in segments:
-        x_min.append(segment.left)
-        x_max.append(segment.right)
-        ax.plot(segment.left, 0, 'go', color="#ff0067")
-        ax.plot(segment.right, 0, 'go', color="#ff0067")
+        fig.add_trace(go.Scatter(
+            x=[segment.left, segment.right],
+            y=[0, 0],
+            marker={'size': 7},
+            line={'color': THEME_COLOR, 'width': 3},
+            name="",
+            hovertemplate='%{x}'
+        ))
 
-    ax.hlines([0] * len(segments), x_min, x_max, color='#ff0067')
-    st.pyplot(fig)
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=False, zeroline=True, zerolinecolor='gray', zerolinewidth=2, showticklabels=False)
+    fig.update_layout(height=70, plot_bgcolor='white', showlegend=False,
+                      margin=dict(b=0, t=60)
+                      )
+    st.write(fig)
 
 
-def on_end_clarification(values):
-    st.text(f"Number of steps: {len(values)}")
-    st.text(f"Approximate solution: {values[-1]}")
-    st.text(f"|x_m - x_(m-1)|: {abs(values[-1] - values[-2])}")
+def display_approximate_values(statistic, function, method_name):
+    values = statistic.values
+    st.markdown(rf'''$\quad$ The number of steps $m$: $\;$ ${len(values) - 1}$''')
+    st.markdown(rf'''$\quad$ Initial approximation $x_{0}$: $\;$ ${values[0]}$''')
+    if method_name == SecantLineSolver.method_name:
+        st.markdown(rf'''$\quad$ Second initial approximation: $\;$ ${statistic.additional_value}$''')
+    st.markdown(rf'''$\quad$ Final approximation $x_m$: $\;$ ${values[-1]}$''')
+
+    if method_name == HalfDivisionSolver.method_name:
+        st.markdown(rf'''$\quad$ Half the length of the last segment: $\;$ ${statistic.last_segment_length / 2}$''')
+    else:
+        st.markdown(rf'''$\quad$ $|x_m - x_{{m-1}}|$: $\;$ ${abs(values[-1] - values[-2])}$''')
+    st.markdown(rf'''$\quad$ $|f(x_m) - 0|$: $\;$ ${abs(function(values[-1]))}$''')
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=list(range(len(values))), y=values, marker=dict(size=7), line=dict(color=THEME_COLOR, width=3), name="",
+        hovertemplate='Step: %{x}<br>' +
+                      'Value: %{y}'
+    ))
+    fig.update_layout(showlegend=False,
+                      margin=dict(l=0, r=0, b=0, t=30),
+                      height=230,
+                      )
+
+    st.plotly_chart(fig)
 
 
 def main():
     solvers = {
-        'Half division': HalfDivisionSolver,
-        'Newton method': NewtonMethodSolver,
-        'Modified Newton method': ModifiedNewtonMethodSolver,
-        'Secant line': SecantLineSolver,
+        HalfDivisionSolver.method_name: HalfDivisionSolver,
+        NewtonMethodSolver.method_name: NewtonMethodSolver,
+        ModifiedNewtonMethodSolver.method_name: ModifiedNewtonMethodSolver,
+        SecantLineSolver.method_name: SecantLineSolver,
         # todo: ALL
     }
-
-    stat_handler = RootSeparatorStatisticHandler(st.text)
 
     st.title('Evaluating the roots')
     expression = st.text_input('Enter expression', '2^(-x)-sin(x)')
     function = parse_expr(process_expression(expression))
     func_as_lambda = lambdify('x', function)
 
-    solver_name = st.selectbox("Choose what you want to colorize:", tuple(solvers))
-    solver = Solver(solvers[solver_name](StatisticHandler(st.text).get_on_action(on_start_calc, on_end_clarification)),
-                    RootSeparator(stat_handler.get_on_action(on_start_calc, on_end_calc)))
-    # (self, function, line_segment, accuracy, number_of_steps, variable: str = 'x')
+    solver_name = st.selectbox("Choose what you want to colorize", tuple(solvers))
+    solver = Solver(solvers[solver_name]())
 
     segment_col1, segment_col2 = st.columns(2)
     left_bound = segment_col1.number_input('Enter line boundaries', step=1.0, value=-5.0)
@@ -162,12 +88,23 @@ def main():
     number_of_steps = st.number_input('Enter how many parts the segment will be divided into', value=25, step=1,
                                       format='%i')
 
-    if st.button('evaluate'):
-        st.header('Result')
+    if st.button('Evaluate'):
+        st.balloons()
+
+        st.title('Result')
 
         result = solver.find_roots(function, LineSegment(left_bound, right_bound), accuracy, number_of_steps)
-        st.text(f"Residual values: {abs(func_as_lambda(result[0]))}")
-        st.latex(result)
+
+        st.header("Separation of roots")
+
+        display_segments(solver.stat.segments)
+
+        st.header("Refinement of the solution")
+
+        for i in range(len(result)):
+            st.subheader(f'Solution {i + 1}')
+            display_approximate_values(solver.stat.single_solver_statistics[i], func_as_lambda, solver_name)
+        # st.latex(result)
 
 
 def process_expression(expression: str) -> str:
@@ -182,7 +119,7 @@ def calc():
     stat = []
     # solver = Solver(NewtonMethodSolver(get_on_action(stat)))
     # solver = Solver(ModifiedNewtonMethodSolver(get_on_action(stat)))
-    solver = Solver(SecantLineSolver(get_on_action(stat)), RootSeparator())
+    solver = Solver(SecantLineSolver())
     # solver = Solver(HalfDivisionSolver(get_on_action(stat)))
 
     # print(solver.find_roots(expr, LineSegment(-3, 3), 10e-5, 6))
@@ -198,3 +135,4 @@ def calc():
 # [0.6761871337890625, 3.017813110351563, 6.295913696289061, 9.423318481445309]
 if __name__ == "__main__":
     main()
+    # calc()
