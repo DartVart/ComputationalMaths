@@ -1,1 +1,0 @@
-Computational Mathematics tasks
