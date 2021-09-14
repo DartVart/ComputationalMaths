@@ -3,9 +3,9 @@ from typing import Optional
 
 from sympy import lambdify
 
-from common.calculators.root_finding.as_newton_solvers.as_newton_solver import AsNewtonMethodSolver
-from common.calculators.utils import Statistic
-from common.models.line_segment import LineSegment
+from a.common import AsNewtonMethodSolver
+from a.common import Statistic
+from a.common import LineSegment
 
 
 @dataclass

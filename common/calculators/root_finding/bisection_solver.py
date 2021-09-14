@@ -2,10 +2,10 @@ from dataclasses import dataclass
 
 from sympy import lambdify
 
-from common.calculators.root_finding.single_root_solver import SingleRootSolver
-from common.calculators.utils import Statistic
-from common.models.line_segment import LineSegment
-from config import COMPUTER_DEVIATION
+from a.common.calculators.root_finding.single_root_solver import SingleRootSolver
+from a.common import Statistic
+from a.common import LineSegment
+from a.config import COMPUTER_DEVIATION
 
 
 @dataclass

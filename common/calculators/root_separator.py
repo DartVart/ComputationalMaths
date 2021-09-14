@@ -1,8 +1,8 @@
 from typing import List
 from sympy import lambdify
 
-from common.models.line_segment import LineSegment
-from config import COMPUTER_DEVIATION
+from a.common import LineSegment
+from a.config import COMPUTER_DEVIATION
 
 
 class RootSeparator:
