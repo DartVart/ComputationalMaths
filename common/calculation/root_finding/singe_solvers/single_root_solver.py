@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from a.common import Statistic
-from a.common import LineSegment
+from common.calculation.root_finding.utils import Statistic
+from common.models.line_segment import LineSegment
 
 
 class SingleRootSolver(ABC):

@@ -2,12 +2,14 @@ from typing import Optional
 
 from sympy import lambdify, diff
 
-from a.common import AsNewtonMethodSolver
-from a.common import LineSegment
+from common.calculation.root_finding.singe_solvers.as_newton_solvers.iterating_over_initial_values import (
+    IteratingOverInitialValues,
+)
+from common.models.line_segment import LineSegment
 
 
-class ModifiedNewtonMethodSolver(AsNewtonMethodSolver):
-    method_name = "Modified Newton method"
+class NewtonMethodSolver(IteratingOverInitialValues):
+    method_name = "Newton method"
 
     def clear_statistic(self):
         self.stat.values = []
@@ -16,11 +18,17 @@ class ModifiedNewtonMethodSolver(AsNewtonMethodSolver):
         self, function, line_segment: LineSegment, accuracy, initial_value, variable: str = "x"
     ) -> Optional[float]:
         self.clear_statistic()
+        derivative = diff(function)
         func_as_lambda = lambdify(variable, function)
+        derivative_as_lambda = lambdify(variable, derivative)
+
+        # second_derivative = lambdify(variable, diff(derivative))
+        # if func_as_lambda(initial_value) * second_derivative(initial_value) < -COMPUTER_DEVIATION:
+        #     return None
+
         step_counter = 0
         prev_value = None
         cur_value = initial_value
-        derivative_value = lambdify(variable, diff(function))(initial_value)
 
         self.stat.values.append(cur_value)
 
@@ -30,7 +38,7 @@ class ModifiedNewtonMethodSolver(AsNewtonMethodSolver):
                 return None
 
             prev_value = cur_value
-            cur_value = prev_value - func_as_lambda(prev_value) / derivative_value
+            cur_value = prev_value - func_as_lambda(prev_value) / derivative_as_lambda(prev_value)
 
             self.stat.values.append(cur_value)
 

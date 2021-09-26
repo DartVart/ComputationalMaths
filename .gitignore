@@ -125,7 +125,7 @@ env/
 ENV/
 env.bak/
 venv.bak/
-venv/git reset
+venv/
 pythonenv*
 
 # Spyder project settings

@@ -4,11 +4,13 @@ from typing import List
 sys.path.append("")
 sys.path.append("../..")
 
-from common.calculators.root_finding.as_newton_solvers.modified_newton_solver import ModifiedNewtonMethodSolver
-from common.calculators.root_finding.as_newton_solvers.newton_solver import NewtonMethodSolver
-from common.calculators.root_finding.as_newton_solvers.secant_solver import SecantLineSolver
-from common.calculators.root_finding.bisection_solver import BisectionSolver
-from common.calculators.root_calculator import RootCalculator
+from common.calculation.root_finding.root_calculator import RootCalculator
+from common.calculation.root_finding.singe_solvers.as_newton_solvers.modified_newton_solver import (
+    ModifiedNewtonMethodSolver,
+)
+from common.calculation.root_finding.singe_solvers.as_newton_solvers.newton_solver import NewtonMethodSolver
+from common.calculation.root_finding.singe_solvers.as_newton_solvers.secant_solver import SecantLineSolver
+from common.calculation.root_finding.singe_solvers.bisection_solver import BisectionSolver
 from common.models.line_segment import LineSegment
 from sympy import lambdify
 from sympy.parsing.sympy_parser import parse_expr
@@ -53,9 +55,7 @@ def display_approximate_values(statistic, function, method_name):
     st.markdown(rf"""{LINE_START} Final approximation $x_m$: $\;$ ${values[-1]}$""")
 
     if method_name == BisectionSolver.method_name:
-        st.markdown(
-            rf"""{LINE_START} Half the length of the last segment: $\;$ ${statistic.last_segment_length / 2}$"""
-        )
+        st.markdown(rf"""{LINE_START} The length of the last segment: $\;$ ${statistic.last_segment_length}$""")
     else:
         st.markdown(rf"""{LINE_START} $|x_m - x_{{m-1}}|$: $\;$ ${abs(values[-1] - values[-2])}$""")
     st.markdown(rf"""{LINE_START} $|f(x_m) - 0|$: $\;$ ${abs(function(values[-1]))}$""")
@@ -102,7 +102,7 @@ def main():
 
     accuracy = st.number_input("Enter accuracy", format="%e", value=1e-6)
     number_of_steps = st.number_input(
-        "Enter how many parts the segment will be divided into", value=25, step=1, format="%i"
+        "Enter how many parts the segment will be divided into", value=100, step=1, format="%i"
     )
 
     if st.button("Evaluate"):

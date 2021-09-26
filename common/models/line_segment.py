@@ -1,4 +1,4 @@
-from a.utils import get_rounded_to_print
+from utils import get_rounded_to_print
 
 
 class LineSegment:
@@ -21,6 +21,16 @@ class LineSegment:
         return (
             f"[{get_rounded_to_print(self.left, print_accuracy)}, {get_rounded_to_print(self.right, print_accuracy)}]"
         )
+
+    def split_into_points(self, number_of_points: int):
+        number_of_parts = number_of_points - 1
+        step = self.length / number_of_parts
+        cur_point = self.left
+        points = [cur_point]
+        for _ in range(number_of_parts):
+            cur_point += step
+            points.append(cur_point)
+        return points
 
     def __str__(self):
         return self.to_str()

@@ -1,8 +1,8 @@
 from dataclasses import replace, dataclass, field
 from typing import List
 
-from a.common.calculators.root_separator import RootSeparator
-from a.common import Statistic
+from common.calculation.root_finding.root_separator import RootSeparator
+from common.calculation.root_finding.utils import Statistic
 
 
 @dataclass

@@ -3,9 +3,11 @@ from typing import Optional
 
 from sympy import lambdify
 
-from a.common import AsNewtonMethodSolver
-from a.common import Statistic
-from a.common import LineSegment
+from common.calculation.root_finding.singe_solvers.as_newton_solvers.iterating_over_initial_values import (
+    IteratingOverInitialValues,
+)
+from common.calculation.root_finding.utils import Statistic
+from common.models.line_segment import LineSegment
 
 
 @dataclass
@@ -13,7 +15,7 @@ class StatisticWithAdditionalInitial(Statistic):
     additional_value: float = 0.0
 
 
-class SecantLineSolver(AsNewtonMethodSolver):
+class SecantLineSolver(IteratingOverInitialValues):
     method_name = "Secant line"
 
     def clear_statistic(self):
