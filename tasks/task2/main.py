@@ -43,7 +43,7 @@ def display_points(points):
     st.dataframe(df)
 
 
-def display_approximate_value(func, x, approximate_value, points, interpolator_name):
+def display_result(func, x, approximate_value, points, interpolator_name):
     st.title("Result")
 
     max_point = max(points + [x])
@@ -137,7 +137,7 @@ def main():
             display_points(optimal_points)
             interpolator_name = st.selectbox("Choose interpolator", tuple(interpolators))
             value_table = (optimal_points, [func(point) for point in optimal_points])
-            display_approximate_value(
+            display_result(
                 func,
                 x_node,
                 interpolators[interpolator_name].get_approximate_value(x_node, value_table),
