@@ -1,5 +1,4 @@
 from typing import List, Tuple
-import time
 
 from common.calculation.interpolation.interpolators.interpolator import Interpolator
 

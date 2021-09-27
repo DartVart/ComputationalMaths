@@ -1,13 +1,16 @@
 import sys
 from typing import List
 
+
 sys.path.append("")
 sys.path.append("../..")
 
+from tasks.utils.expression_parsing import process_expression
 from common.calculation.root_finding.root_calculator import RootCalculator
 from common.calculation.root_finding.singe_solvers.as_newton_solvers.modified_newton_solver import (
     ModifiedNewtonMethodSolver,
 )
+from tasks.utils.plotly_utils import update_figure_to_x_axis
 from common.calculation.root_finding.singe_solvers.as_newton_solvers.newton_solver import NewtonMethodSolver
 from common.calculation.root_finding.singe_solvers.as_newton_solvers.secant_solver import SecantLineSolver
 from common.calculation.root_finding.singe_solvers.bisection_solver import BisectionSolver
@@ -40,9 +43,7 @@ def display_segments(segments: List[LineSegment]):
             )
         )
 
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=False, zeroline=True, zerolinecolor="gray", zerolinewidth=2, showticklabels=False)
-    fig.update_layout(height=70, plot_bgcolor="white", showlegend=False, margin=dict(b=0, t=60))
+    update_figure_to_x_axis(fig)
     st.write(fig)
 
 
@@ -119,10 +120,6 @@ def main():
                 st.error("Couldn't find a solution :(")
             else:
                 display_approximate_values(solver.stat.single_solver_statistics[i], func_as_lambda, solver_name)
-
-
-def process_expression(expression: str) -> str:
-    return expression.replace("^", "**")
 
 
 if __name__ == "__main__":
