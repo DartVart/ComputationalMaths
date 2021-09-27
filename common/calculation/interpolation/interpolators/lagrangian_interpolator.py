@@ -5,6 +5,8 @@ from common.calculation.interpolation.interpolators.interpolator import Interpol
 
 
 class LagrangianInterpolator(Interpolator):
+    name = 'Lagrangian interpolator'
+
     def get_approximate_value(self, x: float, value_table: Tuple[List[float], List[float]]):
         differences_with_x = self._get_differences_with_nodes(x, value_table[0])
         approximate_value = 0

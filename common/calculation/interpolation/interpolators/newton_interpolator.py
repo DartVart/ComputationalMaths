@@ -4,6 +4,8 @@ from common.calculation.interpolation.interpolators.interpolator import Interpol
 
 
 class NewtonInterpolator(Interpolator):
+    name = 'Newton interpolator'
+
     def get_approximate_value(self, x: float, value_table: Tuple[List[float], List[float]]):
         parted_differences = self._get_parted_differences(value_table)
         approximate_value = 0
