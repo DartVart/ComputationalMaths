@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from random import uniform
+import random
 from typing import List
 
 from common.models.float_with_accuracy import FloatWithAccuracy
@@ -16,11 +16,14 @@ class PointGenerator(ABC, Named):
 class RandomPointGenerator(PointGenerator):
     name = 'Random'
 
-    @staticmethod
-    def generate(line_segment: LineSegment, number_of_points: int) -> List[float]:
+    def __init__(self, seed=666):
+        self.seed = seed
+
+    def generate(self, line_segment: LineSegment, number_of_points: int) -> List[float]:
+        random.seed(self.seed)
         points = set()
         while len(points) < number_of_points:
-            new_value = FloatWithAccuracy(uniform(line_segment.left, line_segment.right))
+            new_value = FloatWithAccuracy(random.uniform(line_segment.left, line_segment.right))
             points.add(new_value)
         return [float(val) for val in points]
 
@@ -28,6 +31,5 @@ class RandomPointGenerator(PointGenerator):
 class EquidistantPointGenerator(PointGenerator):
     name = 'Equidistant'
 
-    @staticmethod
-    def generate(line_segment: LineSegment, number_of_points: int) -> List[float]:
+    def generate(self, line_segment: LineSegment, number_of_points: int) -> List[float]:
         return line_segment.split_into_points(number_of_points)
