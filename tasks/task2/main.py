@@ -1,15 +1,15 @@
 import sys
 
-from tasks.task2.config import INTERPOLATORS, POINT_GENERATORS
 
 sys.path.append("")
 sys.path.append("../..")
 
 from sympy import lambdify
 
+from config import COLORS
 from common.models.line_segment import LineSegment
+from common.calculation.interpolation.interpolators.newton_interpolator import NewtonInterpolator
 from common.models.point_generation import RandomPointGenerator, EquidistantPointGenerator
-from config import THEME_COLOR
 from tasks.utils.plotly_utils import update_figure_to_x_axis
 from tasks.utils.expression_parsing import custom_parse_expr
 from common.calculation.interpolation.find_optimal_points import find_optimal_points
@@ -20,10 +20,19 @@ import plotly.graph_objects as go
 import pandas as pd
 
 LINE_START = "$\quad$"
-FUNC_EXPRESSION = "ln(1+x)"
+
+INTERPOLATORS = {
+    LagrangianInterpolator.name: LagrangianInterpolator(),
+    NewtonInterpolator.name: NewtonInterpolator(),
+}
+
+POINT_GENERATORS = {
+    RandomPointGenerator.name: RandomPointGenerator(),
+    EquidistantPointGenerator.name: EquidistantPointGenerator(),
+}
 
 
-def display_points(points):
+def display_points(points, title="", x_point=None):
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -31,13 +40,18 @@ def display_points(points):
             x=points,
             y=[0] * len(points),
             marker={"size": 7},
-            line={"color": THEME_COLOR, "width": 3},
+            line={"color": COLORS['theme_color'], "width": 3},
             name="",
             hovertemplate="%{x}",
         )
     )
 
+    if x_point:
+        fig.add_scatter(x=[x_point], y=[0], mode="markers", marker={"size": 7, "color": COLORS['dark_blue']}, name="x",
+                        hovertemplate="%{x}")
+
     update_figure_to_x_axis(fig)
+    fig.update_layout(title=title)
     st.write(fig)
     df = pd.DataFrame(data={f"{i + 1}": point for i, point in enumerate(points)}, index=["Value"])
     st.dataframe(df)
@@ -56,7 +70,7 @@ def display_result(func, x, approximate_value, points, interpolator_name):
             y=[func(point) for point in points_for_func],
             mode="lines",
             name="Function",
-            marker=dict(color="#42a5f5"),
+            marker=dict(color='gray'),
         )
     )
 
@@ -66,7 +80,7 @@ def display_result(func, x, approximate_value, points, interpolator_name):
         mode="markers",
         hovertemplate="(%{x}, %{y})",
         name="Result",
-        marker=dict(color="#e53935", size=10),
+        marker=dict(color=COLORS['dark_blue'], size=10),
     )
     fig.add_scatter(
         x=points,
@@ -74,7 +88,7 @@ def display_result(func, x, approximate_value, points, interpolator_name):
         mode="markers",
         hovertemplate="(%{x}, %{y})",
         name="Nodes",
-        marker=dict(color="#0077c2", size=8),
+        marker=dict(color=COLORS['theme_color'], size=8),
     )
     fig.update_layout(margin=dict(l=0, t=40, b=0, r=0))
     st.write(fig)
@@ -90,10 +104,10 @@ def main():
         st.session_state["seed"] = 666
         st.session_state["number_of_points"] = 15
 
-    func = lambdify("x", custom_parse_expr(FUNC_EXPRESSION))
-
     st.title("Algebraic interpolation")
-    st.markdown(rf"""Function to interpolate: $\;$ ${FUNC_EXPRESSION}$""")
+
+    expression = st.text_input("Enter expression", "ln(1+x)")
+    func = lambdify("x", custom_parse_expr(expression))
 
     number_of_all_points = st.number_input("Enter number of points m + 1", value=st.session_state["number_of_points"])
 
@@ -125,7 +139,7 @@ def main():
         else:
             optimal_points = find_optimal_points(x_node, all_points, polynomial_degree + 1)
             st.markdown(f"${LINE_START[1:-1] * 3}$ **Optimal points**")
-            display_points(optimal_points)
+            display_points(optimal_points, "Оптимальные узлы", x_node)
             interpolator_name = st.selectbox("Choose interpolator", tuple(INTERPOLATORS))
             value_table = (optimal_points, [func(point) for point in optimal_points])
             display_result(
