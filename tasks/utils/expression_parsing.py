@@ -11,7 +11,7 @@ TRANSFORMATIONS = standard_transformations + (
     split_symbols,
     implicit_multiplication,
     function_exponentiation,
-    convert_xor
+    convert_xor,
 )
 
 

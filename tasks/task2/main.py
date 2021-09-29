@@ -20,10 +20,7 @@ import pandas as pd
 
 LINE_START = "$\quad$"
 
-INTERPOLATORS = {
-    LagrangianInterpolator.name: LagrangianInterpolator(),
-    NewtonInterpolator.name: NewtonInterpolator(),
-}
+INTERPOLATORS = [LagrangianInterpolator(), NewtonInterpolator()]
 
 POINT_GENERATORS = {
     RandomPointGenerator.name: RandomPointGenerator(),
@@ -39,15 +36,21 @@ def display_points(points, title="", x_point=None):
             x=points,
             y=[0] * len(points),
             marker={"size": 7},
-            line={"color": COLORS['theme_color'], "width": 3},
+            line={"color": COLORS["theme_color"], "width": 3},
             name="",
             hovertemplate="%{x}",
         )
     )
 
     if x_point:
-        fig.add_scatter(x=[x_point], y=[0], mode="markers", marker={"size": 7, "color": COLORS['dark_blue']}, name="x",
-                        hovertemplate="%{x}")
+        fig.add_scatter(
+            x=[x_point],
+            y=[0],
+            mode="markers",
+            marker={"size": 7, "color": COLORS["dark_blue"]},
+            name="x",
+            hovertemplate="%{x}",
+        )
 
     update_figure_to_x_axis(fig)
     fig.update_layout(title=title)
@@ -57,7 +60,7 @@ def display_points(points, title="", x_point=None):
 
 
 def display_result(func, x, approximate_value, points, interpolator_name):
-    st.title("Результат")
+    st.header(interpolator_name)
 
     max_point = max(points + [x])
     min_point = min(points + [x])
@@ -69,7 +72,7 @@ def display_result(func, x, approximate_value, points, interpolator_name):
             y=[func(point) for point in points_for_func],
             mode="lines",
             name="Функция",
-            marker=dict(color='gray'),
+            marker=dict(color="gray"),
         )
     )
 
@@ -79,7 +82,7 @@ def display_result(func, x, approximate_value, points, interpolator_name):
         mode="markers",
         hovertemplate="(%{x}, %{y})",
         name="Узлы",
-        marker=dict(color=COLORS['theme_color'], size=8),
+        marker=dict(color=COLORS["theme_color"], size=8),
     )
     fig.add_scatter(
         x=[x],
@@ -87,11 +90,12 @@ def display_result(func, x, approximate_value, points, interpolator_name):
         mode="markers",
         hovertemplate="(%{x}, %{y})",
         name="Результат",
-        marker=dict(color=COLORS['dark_blue'], size=10),
+        marker=dict(color=COLORS["dark_blue"], size=10),
     )
 
     fig.update_layout(margin=dict(l=0, t=40, b=0, r=0))
-    st.write(fig)
+    with st.expander("График", expanded=True):
+        st.plotly_chart(fig, use_container_width=True)
 
     polynomial_symbol = "P^{L}_n" if interpolator_name == LagrangianInterpolator.name else "P^{N}_n"
     st.markdown(rf"""{LINE_START} Интерполяционное значение ${polynomial_symbol}(x) = {approximate_value}$""")
@@ -145,15 +149,17 @@ def main():
         else:
             optimal_points = find_optimal_points(x_node, all_points, polynomial_degree + 1)
             display_points(optimal_points, "Оптимальные узлы", x_node)
-            interpolator_name = st.selectbox("Выберите то, как будет происходить интерполяция", tuple(INTERPOLATORS))
             value_table = (optimal_points, [func(point) for point in optimal_points])
-            display_result(
-                func,
-                x_node,
-                INTERPOLATORS[interpolator_name].get_approximate_value(x_node, value_table),
-                optimal_points,
-                interpolator_name,
-            )
+
+            st.title("Результат")
+            for interpolator in INTERPOLATORS:
+                display_result(
+                    func,
+                    x_node,
+                    interpolator.get_approximate_value(x_node, value_table),
+                    optimal_points,
+                    interpolator.name,
+                )
 
 
 if __name__ == "__main__":

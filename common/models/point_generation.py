@@ -14,7 +14,7 @@ class PointGenerator(ABC, Named):
 
 
 class RandomPointGenerator(PointGenerator):
-    name = 'Случайные'
+    name = "Случайные"
 
     def __init__(self, seed=666):
         self.seed = seed
@@ -29,7 +29,7 @@ class RandomPointGenerator(PointGenerator):
 
 
 class EquidistantPointGenerator(PointGenerator):
-    name = 'Равноотстающие'
+    name = "Равноотстающие"
 
     def generate(self, line_segment: LineSegment, number_of_points: int) -> List[float]:
         return line_segment.split_into_points(number_of_points)
