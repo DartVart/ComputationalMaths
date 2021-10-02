@@ -5,7 +5,7 @@ from typing import List
 sys.path.append("")
 sys.path.append("../..")
 
-from tasks.utils.expression_parsing import process_expression
+from tasks.utils.expression_parsing import custom_parse_expr
 from common.calculation.root_finding.root_calculator import RootCalculator
 from common.calculation.root_finding.singe_solvers.as_newton_solvers.modified_newton_solver import (
     ModifiedNewtonMethodSolver,
@@ -18,7 +18,7 @@ from common.models.line_segment import LineSegment
 from sympy import lambdify
 from sympy.parsing.sympy_parser import parse_expr
 import streamlit as st
-from config import THEME_COLOR
+from config import COLORS
 import plotly.graph_objects as go
 
 LINE_START = "$\quad$"
@@ -37,7 +37,7 @@ def display_segments(segments: List[LineSegment]):
                 x=[segment.left, segment.right],
                 y=[0, 0],
                 marker={"size": 7},
-                line={"color": THEME_COLOR, "width": 3},
+                line={"color": COLORS['theme_color'], "width": 3},
                 name="",
                 hovertemplate="%{x}",
             )
@@ -67,7 +67,7 @@ def display_approximate_values(statistic, function, method_name):
             x=list(range(len(values))),
             y=values,
             marker=dict(size=7),
-            line=dict(color=THEME_COLOR, width=3),
+            line=dict(color=COLORS['theme_color'], width=3),
             name="",
             hovertemplate="Step: %{x}<br>" + "Value: %{y}",
         )
@@ -91,7 +91,7 @@ def main():
 
     st.title("Evaluating the roots")
     expression = st.text_input("Enter expression", "2^(-x)-sin(x)")
-    function = parse_expr(process_expression(expression))
+    function = custom_parse_expr(expression)
     func_as_lambda = lambdify("x", function)
 
     solver_name = st.selectbox("Choose what you want to colorize", tuple(solvers))
