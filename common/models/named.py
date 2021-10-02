@@ -1,0 +1,2 @@
+class Named:
+    name: str
