@@ -1,6 +1,7 @@
 from typing import List
 from sympy import lambdify
 
+from common.calculation.root_finding.utils import get_lambda_func
 from common.models.line_segment import LineSegment
 from config import COMPUTER_DEVIATION
 
@@ -8,7 +9,7 @@ from config import COMPUTER_DEVIATION
 class RootSeparator:
     @staticmethod
     def separate(expression, line_segment: LineSegment, number_of_steps: int, variable: str = "x") -> List[LineSegment]:
-        function = lambdify(variable, expression)
+        function = get_lambda_func(expression, variable)
         segments = []
         step = line_segment.length / number_of_steps
         cur_segment = line_segment
