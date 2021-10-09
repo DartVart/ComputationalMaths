@@ -20,14 +20,12 @@ from tasks.utils.streamlit import (
     input_points,
     display_x_points,
     display_title,
+    get_new_key,
+    set_initial_key,
+    display_whitespace,
 )
 
 LINE_START = "$\quad$"
-
-
-def get_new_key():
-    st.session_state["key"] += 1
-    return st.session_state["key"]
 
 
 def get_polynomial_as_lambda(interpolator, value_table):
@@ -79,8 +77,15 @@ def display_result(function, points, desired_values, desired_f_value, add_graph_
     points_for_function = np.linspace(min_point - additional_value, max_point + additional_value, 150)
 
     fig = go.Figure()
-    add_line(fig, points_for_function, lambda x: desired_f_value, "Искомое значение", "gray", dash="dash",
-             hover_template="%{y}")
+    add_line(
+        fig,
+        points_for_function,
+        func=lambda x: desired_f_value,
+        name="Искомое значение",
+        color="gray",
+        dash="dash",
+        hover_template="%{y}",
+    )
     add_line(fig, points_for_function, function, "Функция", "gray")
     add_graph_function(fig, points_for_function)
     add_nodes(fig, points, function, "Узлы", COLORS["theme_color"], 8)
@@ -103,7 +108,7 @@ def make_inverse_interpolate_first_way(function, f_value, all_points):
 
     polynomial_degree = (
         input_polynomial_degree(
-            col_2, len(all_points) - 1, st.session_state["second_polynomial_degree"], key=get_new_key()
+            col_2, len(all_points) - 1, st.session_state["second_polynomial_degree"], key=get_new_key(st)
         )
         if need_new_polynomial_degree
         else st.session_state["second_polynomial_degree"]
@@ -116,22 +121,38 @@ def make_inverse_interpolate_first_way(function, f_value, all_points):
         )
         value_table = tuple(zip(*optimal_double_points))
 
-        display_x_points(st, value_table[0], get_new_key(), ['f(xᵢ)', 'xᵢ'], 'Оптимальные значения f(xᵢ)',
-                         value_table[1], f_value, 'F')
+        display_x_points(
+            st,
+            x=value_table[0],
+            key=get_new_key(st),
+            names=["f(xᵢ)", "xᵢ"],
+            title="Оптимальные значения f(xᵢ)",
+            y=value_table[1],
+            x_point=f_value,
+            x_point_name="F",
+        )
 
         interpolator = LagrangianInterpolator()
         desired_value = interpolator.get_approximate_value(f_value, value_table)
 
-        display_result(function, value_table[1], [desired_value], f_value,
-                       get_add_inverse_polynomial(function, get_polynomial_as_lambda(interpolator, value_table)))
+        display_result(
+            function,
+            points=value_table[1],
+            desired_values=[desired_value],
+            desired_f_value=f_value,
+            add_graph_function=get_add_inverse_polynomial(
+                function, get_polynomial_as_lambda(interpolator, value_table)
+            ),
+        )
 
 
 def make_inverse_interpolate_second_way(function, f_value, line_segment, all_points):
     display_title(st, "Способ с построением полинома функции", 2)
 
     solver = RootCalculator(SecantLineSolver())
-    polynomial_degree = input_polynomial_degree(st, len(all_points) - 1, st.session_state["polynomial_degree"],
-                                                key=get_new_key())
+    polynomial_degree = input_polynomial_degree(
+        st, len(all_points) - 1, st.session_state["polynomial_degree"], key=get_new_key(st)
+    )
     if polynomial_degree is not None:
         st.session_state["polynomial_degree"] = polynomial_degree
 
@@ -142,8 +163,16 @@ def make_inverse_interpolate_second_way(function, f_value, line_segment, all_poi
             key=lambda y: y[0],
         )
         value_table = tuple(zip(*optimal_double_points))
-        display_x_points(st, value_table[1], get_new_key(), ['f(xᵢ)', 'xᵢ'], 'Оптимальные значения f(xᵢ)',
-                         value_table[0], f_value, 'F')
+        display_x_points(
+            st,
+            x=value_table[1],
+            key=get_new_key(st),
+            names=["f(xᵢ)", "xᵢ"],
+            title="Оптимальные значения f(xᵢ)",
+            y=value_table[0],
+            x_point=f_value,
+            x_point_name="F",
+        )
 
         polynomial_as_lambda = get_polynomial_as_lambda(interpolator, value_table)
 
@@ -151,8 +180,9 @@ def make_inverse_interpolate_second_way(function, f_value, line_segment, all_poi
         number_of_steps = st.number_input(
             "Введите на сколько частей разобьется отрезок для нахождения корней", value=100, step=1, format="%i"
         )
-        desired_values = solver.find_roots(lambda x: polynomial_as_lambda(x) - f_value, line_segment, accuracy,
-                                           number_of_steps)
+        desired_values = solver.find_roots(
+            lambda x: polynomial_as_lambda(x) - f_value, line_segment, accuracy, number_of_steps
+        )
         display_result(function, value_table[0], desired_values, f_value, get_add_polynomial(polynomial_as_lambda))
 
 
@@ -162,29 +192,30 @@ def set_initial_state_value(state_name, initial_value):
 
 
 def main():
-    st.session_state["key"] = 100
+    set_initial_key(st)
     set_initial_state_value("polynomial_degree", 7)
     set_initial_state_value("second_polynomial_degree", 7)
 
     display_title(st, "Задача обратного интерполирования")
-    function = input_function(st, "ln(1+x)", key=get_new_key())
+    function = input_function(st, "ln(1+x)", key=get_new_key(st))
 
     col_1, col_2, col_3 = st.columns((2, 2, 3))
-    line_segment = input_line_segment((col_1, col_2), (get_new_key(), get_new_key()))
+    line_segment = input_line_segment((col_1, col_2), (get_new_key(st), get_new_key(st)))
     is_func_monotone = (
-            col_3.radio(f"Функция монотонна на отрезке [{line_segment.left:.1f}, {line_segment.right:.1f}]?",
-                        ("Да", "Нет"))
-            == "Да"
+        col_3.radio(f"Функция монотонна на отрезке [{line_segment.left:.1f}, {line_segment.right:.1f}]?", ("Да", "Нет"))
+        == "Да"
     )
 
-    number_of_all_points, all_points = input_points(st, line_segment, (get_new_key(), get_new_key(), get_new_key()))
+    number_of_all_points, all_points = input_points(
+        st, line_segment, (get_new_key(st), get_new_key(st), get_new_key(st))
+    )
     f_value = st.number_input("Введите значение функции:", step=0.1, value=0.35)
 
-    st.text("")
+    display_whitespace(st)
     make_inverse_interpolate_second_way(function, f_value, line_segment, all_points)
 
     if is_func_monotone:
-        st.text("")
+        display_whitespace(st)
         make_inverse_interpolate_first_way(function, f_value, all_points)
 
 
