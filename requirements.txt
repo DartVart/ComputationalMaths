@@ -1,5 +1,5 @@
 sympy~=1.8
-streamlit~=0.88.0
+streamlit==1.0.0
 plotly~=5.3.1
 black==21.8b0
 pandas~=1.1.3
