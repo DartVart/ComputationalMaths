@@ -1,4 +1,4 @@
-from tasks.utils import get_rounded_to_print
+from utils import get_rounded_to_print
 
 
 class LineSegment:

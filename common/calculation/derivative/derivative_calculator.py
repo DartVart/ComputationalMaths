@@ -19,10 +19,10 @@ class FirstDerivativeCalculator(DerivativeCalculator):
 
     @staticmethod
     def _calculate_right_derivative(left_value, central_value, right_value, inter_node_length):
-        return (3 * left_value - 4 * central_value + right_value) / (2 * inter_node_length)
+        return (3 * right_value - 4 * central_value + left_value) / (2 * inter_node_length)
 
     def calculate(self, function_values, inter_node_length) -> List[float]:
-        if function_values < 3:
+        if len(function_values) < 3:
             raise ValueError("Too few function values.")
         return [
             self._calculate_left_derivative(*function_values[:3], inter_node_length),
@@ -38,7 +38,7 @@ class SecondDerivativeCalculator(DerivativeCalculator):
         return (left_value - 2 * central_value + right_value) / (inter_node_length ** 2)
 
     def calculate(self, function_values, inter_node_length) -> List[float]:
-        if function_values < 3:
+        if len(function_values) < 3:
             raise ValueError("Too few function values.")
         return [self._calculate_central_derivative(*function_values[i - 1:i + 2], inter_node_length)
                 for i in range(1, len(function_values) - 1)]
