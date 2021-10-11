@@ -12,7 +12,7 @@ class RootSeparator:
         function = get_lambda_func(expression, variable)
         segments = []
         step = line_segment.length / number_of_steps
-        cur_segment = line_segment
+        cur_segment = line_segment.copy()
         left_function_value = function(cur_segment.left)
 
         for _ in range(number_of_steps):
