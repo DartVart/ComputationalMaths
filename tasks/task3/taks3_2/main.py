@@ -41,14 +41,14 @@ def display_result_table(
 ):
     no_value_text = "No value"
     data = {
-        "xᵢ": points,
-        "f(xᵢ)": [function_as_lambda(point) for point in points],
-        "f'(xᵢ)чд": first_derivative_values,
-        "|f'(xᵢ)т - f'(xᵢ)чд|": [
+        "x": points,
+        "f(x)": [function_as_lambda(point) for point in points],
+        "approx f'(x)": first_derivative_values,
+        "|Δf'(x)|": [
             abs(first_derivative_as_lambda(point) - first_derivative_values[i]) for i, point in enumerate(points)
         ],
-        "f''(xᵢ)чд": fill_beginning_and_end(second_derivatives_values),
-        "|f''(xᵢ)т - f''(xᵢ)чд|": fill_beginning_and_end(
+        "approx f''(x)": fill_beginning_and_end(second_derivatives_values),
+        "|Δf''(x)|": fill_beginning_and_end(
             [
                 abs(second_derivative_as_lambda(point) - second_derivatives_values[i])
                 for i, point in enumerate(points[1:-1])
@@ -60,9 +60,9 @@ def display_result_table(
     df_styler = (
         df.style.format(
             formatter={
-                "|f'(xᵢ)т - f'(xᵢ)чд|": "{:e}",
-                "f''(xᵢ)чд": lambda x: no_value_text if np.isnan(x) else f"{x:.6f}",
-                "|f''(xᵢ)т - f''(xᵢ)чд|": lambda x: no_value_text if np.isnan(x) else f"{x:e}",
+                "|Δf'(x)|": "{:e}",
+                "approx f''(x)": lambda x: no_value_text if np.isnan(x) else f"{x:.6f}",
+                "|Δf''(x)|": lambda x: no_value_text if np.isnan(x) else f"{x:e}",
             }
         )
         .set_properties(**{"background-color": "#fff2f7"}, subset=idx[::2, :])
@@ -108,7 +108,7 @@ def display_result(points, sympy_function, first_derivative_values, second_deriv
         first_derivative_values,
         function=first_derivative_as_lambda,
         line_title="f'",
-        points_title="f' ч.д.",
+        points_title="approx f'",
         line_color="gray",
         point_color=COLORS["theme_color"],
         row=1,
@@ -120,13 +120,13 @@ def display_result(points, sympy_function, first_derivative_values, second_deriv
         second_derivatives_values,
         function=second_derivative_as_lambda,
         line_title="f''",
-        points_title="f'' ч.д.",
+        points_title="approx f''",
         line_color="black",
         point_color=COLORS["dark_blue"],
         row=1,
         col=2,
     )
-    fig.update_layout(margin=dict(l=0, t=40, b=0, r=0))
+    fig.update_layout(margin=dict(l=0, t=50, b=0, r=0))
 
     display_title(st, "Графики", 4)
     st.plotly_chart(fig, use_container_width=True)

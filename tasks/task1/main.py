@@ -37,7 +37,7 @@ def display_segments(segments: List[LineSegment]):
                 x=[segment.left, segment.right],
                 y=[0, 0],
                 marker={"size": 7},
-                line={"color": COLORS['theme_color'], "width": 3},
+                line={"color": COLORS["theme_color"], "width": 3},
                 name="",
                 hovertemplate="%{x}",
             )
@@ -67,7 +67,7 @@ def display_approximate_values(statistic, function, method_name):
             x=list(range(len(values))),
             y=values,
             marker=dict(size=7),
-            line=dict(color=COLORS['theme_color'], width=3),
+            line=dict(color=COLORS["theme_color"], width=3),
             name="",
             hovertemplate="Step: %{x}<br>" + "Value: %{y}",
         )
