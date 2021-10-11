@@ -170,7 +170,7 @@ def main():
             x=function_values,
             y=all_points,
             key=get_new_key(st),
-            names=("f(xᵢ)", "xᵢ"),
+            names=("f(x)", "x"),
             title="Значения функции в сгенерированных точках",
         )
 
