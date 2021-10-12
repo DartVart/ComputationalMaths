@@ -2,11 +2,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 from sympy import lambdify
+from sympy.core.assumptions import ManagedProperties
 
 from common.calculation.root_finding.singe_solvers.as_newton_solvers.iterating_over_initial_values import (
     IteratingOverInitialValues,
 )
-from common.calculation.root_finding.utils import Statistic
+from common.calculation.root_finding.utils import Statistic, get_lambda_func
 from common.models.line_segment import LineSegment
 
 
@@ -30,7 +31,7 @@ class SecantLineSolver(IteratingOverInitialValues):
         self, function, line_segment: LineSegment, accuracy, initial_value, variable: str = "x"
     ) -> Optional[float]:
         self.clear_statistic()
-        func_as_lambda = lambdify(variable, function)
+        func_as_lambda = get_lambda_func(function, variable)
 
         step_counter = 0
         prev_value = None
@@ -54,7 +55,8 @@ class SecantLineSolver(IteratingOverInitialValues):
 
             prev_value = cur_value
             prev_function_value = func_as_lambda(prev_value)
-
+            if prev_function_value - prev_prev_function_value == 0:
+                return None
             cur_value = prev_value - prev_function_value * (prev_value - prev_prev_value) / (
                 prev_function_value - prev_prev_function_value
             )

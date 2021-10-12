@@ -32,6 +32,9 @@ class LineSegment:
             points.append(cur_point)
         return points
 
+    def contains(self, number: float):
+        return self.left <= number <= self.right
+
     def __str__(self):
         return self.to_str()
 
