@@ -1,5 +1,6 @@
 import sys
 
+
 sys.path.append("")
 sys.path.append("../../..")
 
@@ -7,6 +8,7 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 
+from common.models.point_generation import EquidistantPointGenerator
 from common.calculation.interpolation.interpolators.newton_interpolator import NewtonInterpolator
 from common.calculation.interpolation.find_optimal_points import find_optimal_points
 from common.calculation.interpolation.interpolators.lagrangian_interpolator import LagrangianInterpolator
@@ -18,7 +20,6 @@ from tasks.utils.streamlit import (
     input_polynomial_degree,
     input_line_segment,
     input_function,
-    input_points,
     display_x_points,
     display_title,
     get_new_key,
@@ -130,8 +131,8 @@ def make_inverse_interpolate_first_way(function, f_value, all_points, line_segme
             st,
             x=value_table[0],
             key=get_new_key(st),
-            names=["f(xᵢ)", "xᵢ"],
-            title="Оптимальные значения f(xᵢ)",
+            names=["f(x)", "x"],
+            title="Оптимальные значения функции",
             y=value_table[1],
             x_point=f_value,
             x_point_name="F",
@@ -174,8 +175,8 @@ def make_inverse_interpolate_second_way(function, f_value, line_segment, all_poi
             st,
             x=value_table[1],
             key=get_new_key(st),
-            names=["f(xᵢ)", "xᵢ"],
-            title="Оптимальные значения f(xᵢ)",
+            names=["f(x)", "x"],
+            title="Оптимальные значения функции",
             y=value_table[0],
             x_point=f_value,
             x_point_name="F",
@@ -221,9 +222,17 @@ def main():
         == "Да"
     )
 
-    number_of_all_points, all_points = input_points(
-        st, line_segment, (get_new_key(st), get_new_key(st), get_new_key(st))
+    number_of_all_points = st.number_input("Введите количество узлов", value=15, key=get_new_key(st))
+    all_points = sorted(EquidistantPointGenerator().generate(line_segment, number_of_all_points))
+    display_x_points(
+        st,
+        x=[function(point) for point in all_points],
+        y=all_points,
+        key=get_new_key(st),
+        names=("f(x)", "x"),
+        title="Значения функции в сгенерированных точках",
     )
+
     f_value = st.number_input("Введите значение функции:", step=0.1, value=0.35)
 
     display_whitespace(st)
