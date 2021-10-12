@@ -28,10 +28,7 @@ from tasks.utils.streamlit import (
 
 LINE_START = "$\quad$"
 
-INTERPOLATORS = {
-    LagrangianInterpolator.name: LagrangianInterpolator(),
-    NewtonInterpolator.name: NewtonInterpolator()
-}
+INTERPOLATORS = {LagrangianInterpolator.name: LagrangianInterpolator(), NewtonInterpolator.name: NewtonInterpolator()}
 
 
 def get_polynomial_as_lambda(interpolator, value_table):
@@ -141,7 +138,8 @@ def make_inverse_interpolate_first_way(function, f_value, all_points, line_segme
         )
 
         interpolator = INTERPOLATORS[
-            st.selectbox("Выберите представление многочлена", tuple(INTERPOLATORS), key=get_new_key(st))]
+            st.selectbox("Выберите представление многочлена", tuple(INTERPOLATORS), key=get_new_key(st))
+        ]
         desired_value = interpolator.get_approximate_value(f_value, value_table)
 
         display_result(
@@ -152,7 +150,7 @@ def make_inverse_interpolate_first_way(function, f_value, all_points, line_segme
             add_graph_function=get_add_inverse_polynomial(
                 function, get_polynomial_as_lambda(interpolator, value_table)
             ),
-            line_segment=line_segment
+            line_segment=line_segment,
         )
 
 
@@ -195,8 +193,9 @@ def make_inverse_interpolate_second_way(function, f_value, line_segment, all_poi
             lambda x: polynomial_as_lambda(x) - f_value, line_segment, accuracy, number_of_steps
         )
 
-        display_result(function, value_table[0], desired_values, f_value, get_add_polynomial(polynomial_as_lambda),
-                       line_segment)
+        display_result(
+            function, value_table[0], desired_values, f_value, get_add_polynomial(polynomial_as_lambda), line_segment
+        )
         return True
     else:
         return False
@@ -218,9 +217,8 @@ def main():
     col_1, col_2, col_3 = st.columns((2, 2, 3))
     line_segment = input_line_segment((col_1, col_2), (get_new_key(st), get_new_key(st)))
     is_func_monotone = (
-            col_3.radio(f"Функция монотонна на отрезке [{line_segment.left:.1f}, {line_segment.right:.1f}]?",
-                        ("Да", "Нет"))
-            == "Да"
+        col_3.radio(f"Функция монотонна на отрезке [{line_segment.left:.1f}, {line_segment.right:.1f}]?", ("Да", "Нет"))
+        == "Да"
     )
 
     number_of_all_points, all_points = input_points(
@@ -234,7 +232,6 @@ def main():
     if is_func_monotone and is_success:
         display_whitespace(st)
         make_inverse_interpolate_first_way(function, f_value, all_points, line_segment)
-
 
 
 if __name__ == "__main__":
