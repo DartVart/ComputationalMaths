@@ -21,8 +21,12 @@ def set_initial_key(st):
 
 
 def input_function(st, initial_expression: str, key):
-    expression = st.text_input("Введите выражение", initial_expression, key=key)
+    expression = input_sympy_function(st, initial_expression, key)
     return lambdify("x", custom_parse_expr(expression))
+
+
+def input_sympy_function(st, initial_expression: str, key):
+    return st.text_input("Введите выражение", initial_expression, key=key)
 
 
 def input_points(st, line_segment, keys: Tuple[int, int, int]):
