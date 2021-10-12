@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Sequence, Tuple
 
 from common.calculation.interpolation.interpolators.interpolator import Interpolator
 
@@ -6,7 +6,7 @@ from common.calculation.interpolation.interpolators.interpolator import Interpol
 class NewtonInterpolator(Interpolator):
     name = "Форма Ньютона"
 
-    def get_approximate_value(self, x: float, value_table: Tuple[List[float], List[float]]):
+    def get_approximate_value(self, x: float, value_table: Tuple[Sequence[float], Sequence[float]]):
         parted_differences = self._get_parted_differences(value_table)
         approximate_value = 0
         differences_prod = 1.0

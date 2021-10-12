@@ -1,22 +1,27 @@
 import sys
 
+
 sys.path.append("")
 sys.path.append("../..")
 
-from sympy import lambdify
-
 from config import COLORS
-from common.models.line_segment import LineSegment
+from tasks.utils.plotly import add_line, add_nodes
 from common.calculation.interpolation.interpolators.newton_interpolator import NewtonInterpolator
 from common.models.point_generation import RandomPointGenerator, EquidistantPointGenerator
-from tasks.utils.plotly_utils import update_figure_to_x_axis
-from tasks.utils.expression_parsing import custom_parse_expr
 from common.calculation.interpolation.find_optimal_points import find_optimal_points
 from common.calculation.interpolation.interpolators.lagrangian_interpolator import LagrangianInterpolator
 import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
-import pandas as pd
+from tasks.utils.streamlit import (
+    input_polynomial_degree,
+    input_line_segment,
+    input_function,
+    display_x_points,
+    display_title,
+    get_new_key,
+    set_initial_key,
+)
 
 LINE_START = "$\quad$"
 
@@ -28,37 +33,6 @@ POINT_GENERATORS = {
 }
 
 
-def display_points(points, title="", x_point=None):
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            mode="markers+text",
-            x=points,
-            y=[0] * len(points),
-            marker={"size": 7},
-            line={"color": COLORS["theme_color"], "width": 3},
-            name="",
-            hovertemplate="%{x}",
-        )
-    )
-
-    if x_point:
-        fig.add_scatter(
-            x=[x_point],
-            y=[0],
-            mode="markers",
-            marker={"size": 7, "color": COLORS["dark_blue"]},
-            name="x",
-            hovertemplate="%{x}",
-        )
-
-    update_figure_to_x_axis(fig)
-    fig.update_layout(title=title)
-    st.write(fig)
-    df = pd.DataFrame(data={f"{i + 1}": point for i, point in enumerate(points)}, index=["Значение"])
-    st.dataframe(df)
-
-
 def display_result(func, x, approximate_value, points, interpolator_name):
     st.header(interpolator_name)
 
@@ -66,32 +40,11 @@ def display_result(func, x, approximate_value, points, interpolator_name):
     min_point = min(points + [x])
     additional_value = (max_point - min_point) * 0.1
     points_for_func = np.linspace(min_point - additional_value, max_point + additional_value, 150)
-    fig = go.Figure(
-        data=go.Scatter(
-            x=points_for_func,
-            y=[func(point) for point in points_for_func],
-            mode="lines",
-            name="Функция",
-            marker=dict(color="gray"),
-        )
-    )
 
-    fig.add_scatter(
-        x=points,
-        y=[func(point) for point in points],
-        mode="markers",
-        hovertemplate="(%{x}, %{y})",
-        name="Узлы",
-        marker=dict(color=COLORS["theme_color"], size=8),
-    )
-    fig.add_scatter(
-        x=[x],
-        y=[approximate_value],
-        mode="markers",
-        hovertemplate="(%{x}, %{y})",
-        name="Результат",
-        marker=dict(color=COLORS["dark_blue"], size=10),
-    )
+    fig = go.Figure()
+    add_line(fig, points_for_func, func, "Функция", "gray")
+    add_nodes(fig, points, func, "Узлы", COLORS["theme_color"], 8)
+    add_nodes(fig, [x], lambda y: approximate_value, "Результат", COLORS["dark_blue"], 10)
 
     fig.update_layout(margin=dict(l=0, t=40, b=0, r=0))
     with st.expander("График", expanded=True):
@@ -104,21 +57,14 @@ def display_result(func, x, approximate_value, points, interpolator_name):
 
 
 def main():
+    set_initial_key(st)
     if "seed" not in st.session_state:
         st.session_state["seed"] = 666
         st.session_state["number_of_points"] = 15
 
-    st.markdown(
-        """
-        <h1 style='text-align: center'>
-            Задача алгебраического интерполирования
-        </h1>
-        """,
-        unsafe_allow_html=True,
-    )
+    display_title(st, "Задача алгебраического интерполирования")
 
-    expression = st.text_input("Введите выражение", "ln(1+x)")
-    func = lambdify("x", custom_parse_expr(expression))
+    func = input_function(st, "ln(1+x)", key=get_new_key(st))
 
     number_of_all_points = st.number_input("Введите количество узлов", value=st.session_state["number_of_points"])
 
@@ -127,28 +73,19 @@ def main():
         st.session_state["seed"] += 1
         POINT_GENERATORS[RandomPointGenerator.name].seed = st.session_state["seed"]
 
-    segment_col1, segment_col2 = st.columns(2)
-    left_bound = segment_col1.number_input("Введите границы отрезка", step=0.1, value=0.0)
-    right_bound = segment_col2.number_input("", step=0.1, value=1.0)
-
-    line_segment = LineSegment(left_bound, right_bound)
+    line_segment = input_line_segment(st.columns(2), (get_new_key(st), get_new_key(st)))
 
     point_generator_name = st.selectbox("Выберите то, какие сгенерировать узлы", tuple(POINT_GENERATORS))
 
     if number_of_all_points is not None:
         all_points = sorted(POINT_GENERATORS[point_generator_name].generate(line_segment, number_of_all_points))
-        display_points(all_points, "Сгенерированные узлы")
+        display_x_points(st, all_points, get_new_key(st), title="Сгенерированные узлы")
         x_node = st.number_input("Введите точку интерполирования x:", step=0.1, value=0.35)
-        polynomial_degree = st.number_input(
-            f"Введите степень интерполяционного многочлена n, где n <= {number_of_all_points - 1}", value=7
-        )
-        if polynomial_degree > number_of_all_points - 1:
-            st.error(f"Пожалуйста, введите n <= {number_of_all_points - 1}")
-        elif polynomial_degree < 1:
-            st.error(f"Пожалуйста, введите n > 0.")
-        else:
-            optimal_points = find_optimal_points(x_node, all_points, polynomial_degree + 1)
-            display_points(optimal_points, "Оптимальные узлы", x_node)
+        polynomial_degree = input_polynomial_degree(st, number_of_all_points - 1, 7, get_new_key(st))
+        if polynomial_degree is not None:
+            optimal_points = sorted(find_optimal_points(x_node, all_points, polynomial_degree + 1))
+            display_x_points(st, optimal_points, get_new_key(st), title="Оптимальные узлы", x_point=x_node)
+
             value_table = (optimal_points, [func(point) for point in optimal_points])
 
             st.title("Результат")
