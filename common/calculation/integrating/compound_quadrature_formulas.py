@@ -54,8 +54,13 @@ class MiddleRectanglesFormula:
 
 class TrapezesFormula:
     @staticmethod
-    def calculate(function, line_segment: LineSegment, partition_count, sum_at_extremes: float = None,
-                  sum_in_middle_nodes: float = None):
+    def calculate(
+        function,
+        line_segment: LineSegment,
+        partition_count,
+        sum_at_extremes: float = None,
+        sum_in_middle_nodes: float = None,
+    ):
         h = line_segment.length / partition_count
         if sum_in_middle_nodes is None:
             sum_in_middle_nodes = get_sum_in_middle_nodes(function, line_segment, partition_count)
@@ -66,8 +71,14 @@ class TrapezesFormula:
 
 class SimpsonFormula:
     @staticmethod
-    def calculate(function, line_segment: LineSegment, partition_count, sum_at_extremes: float = None,
-                  sum_in_middle_nodes: float = None, sum_in_middle_of_segments: float = None):
+    def calculate(
+        function,
+        line_segment: LineSegment,
+        partition_count,
+        sum_at_extremes: float = None,
+        sum_in_middle_nodes: float = None,
+        sum_in_middle_of_segments: float = None,
+    ):
         h = line_segment.length / partition_count
         if sum_in_middle_nodes is None:
             sum_in_middle_nodes = get_sum_in_middle_nodes(function, line_segment, partition_count)
