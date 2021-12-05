@@ -98,6 +98,13 @@ FUNCTIONS = {
         "3_der_max": lambda x: 18,
         "4_der_max": zero_func,
     },
+    "E^(3*x)": {
+        "sympy": custom_parse_expr('E^(3*x)'),
+        "1_der_max": get_modulo_max_in_extreme_points(lambda x: 3 * (math.e ** (3 * x))),
+        "2_der_max": get_modulo_max_in_extreme_points(lambda x: 9 * (math.e ** (3 * x))),
+        "3_der_max": get_modulo_max_in_extreme_points(lambda x: 27 * (math.e ** (3 * x))),
+        "4_der_max": get_modulo_max_in_extreme_points(lambda x: 81 * (math.e ** (3 * x))),
+    },
 }
 
 
