@@ -4,7 +4,7 @@ def update_figure_to_x_axis(figure):
     figure.update_layout(height=70, plot_bgcolor="white", showlegend=False, margin=dict(b=0, t=60))
 
 
-def add_nodes(fig, points, func, name, color, size, hover_template="(%{x}, %{y})", row=None, col=None):
+def add_nodes(fig, points, func, name, color, size, hover_template="(%{x}, %{y})", row=None, col=None, showlegend=True):
     fig.add_scatter(
         x=points,
         y=[func(point) for point in points],
@@ -14,6 +14,7 @@ def add_nodes(fig, points, func, name, color, size, hover_template="(%{x}, %{y})
         marker=dict(color=color, size=size),
         row=row,
         col=col,
+        showlegend=showlegend
     )
 
 

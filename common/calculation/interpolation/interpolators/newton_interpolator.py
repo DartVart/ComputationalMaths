@@ -6,16 +6,14 @@ from common.calculation.interpolation.interpolators.interpolator import Interpol
 class NewtonInterpolator(Interpolator):
     name = "Форма Ньютона"
 
+    # value table = ([<x>, ...], [<y>, ...])
     def get_approximate_value(self, x: float, value_table: Tuple[Sequence[float], Sequence[float]]):
         parted_differences = self._get_parted_differences(value_table)
         approximate_value = 0
         differences_prod = 1.0
-        print("Добавления")
         for i in range(len(value_table[0])):
             approximate_value += parted_differences[i] * differences_prod
-            print(f"{parted_differences[i] * differences_prod}, {parted_differences[i]}")
             differences_prod *= x - value_table[0][i]
-        print("Конец добавления")
         return approximate_value
 
     @staticmethod
@@ -31,9 +29,6 @@ class NewtonInterpolator(Interpolator):
                 )
                 cur_differences_level.append(new_value)
             parted_differences.append(cur_differences_level[0])
-            print(cur_differences_level)
 
             prev_differences_level = cur_differences_level
-        print()
-        print()
         return parted_differences
