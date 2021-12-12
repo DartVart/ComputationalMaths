@@ -58,7 +58,7 @@ def display_result(line_segment: LineSegment, partition_count, addition_partitio
         display_title(st, quadrature_name, 3)
         st.markdown(rf"""{LINE_START} $J(h) = {h_approx}$""")
         st.markdown(rf"""{LINE_START} $J(h/l) = {h_l_approx}$""")
-        st.markdown(rf"""{LINE_START} $\overline{{J}} = {h_approx}$""")
+        st.markdown(rf"""{LINE_START} $\overline{{J}} = {runge_approx}$""")
         st.markdown(rf"""{LINE_START} $|J - J(h)| = {abs(real_integral_value - h_approx)}$""")
         st.markdown(rf"""{LINE_START} $|J - J(h/l)| = {abs(real_integral_value - h_l_approx)}$""")
         st.markdown(rf"""{LINE_START} $|J - \overline{{J}}| = {abs(real_integral_value - runge_approx)}$""")
