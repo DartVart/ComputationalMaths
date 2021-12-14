@@ -89,12 +89,3 @@ class GaussQF:
     def get_function_values(self, function, line_segment: LineSegment, nodes_count):
         lambda_function = get_lambda_func(function)
         return [lambda_function(node) for node in self.get_nodes(line_segment, nodes_count)]
-
-
-# if __name__ == '__main__':
-#     g = GaussQF(1e-12)
-#     function = custom_parse_expr("sin(x) / x")
-#     # print(g.get_coefficients(LineSegment(0, 2), 3))
-#     l = LineSegment(0, 2)
-#     func_values = g.get_function_values(function, l, 3)
-#     print(g.get_approx_integral(func_values, l))

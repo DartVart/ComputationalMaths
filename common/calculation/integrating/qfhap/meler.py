@@ -45,12 +45,3 @@ class MelerQF:
     def get_function_values(self, function, nodes_count):
         lambda_function = get_lambda_func(function)
         return [lambda_function(node) for node in self.get_nodes(nodes_count)]
-
-
-if __name__ == '__main__':
-    g = MelerQF()
-    func = custom_parse_expr("cos(x)")
-    print(g.get_coefficient(3))
-    print(g.get_nodes(3))
-    func_values = g.get_function_values(func, 3)
-    print(g.get_approx_integral(func_values))
