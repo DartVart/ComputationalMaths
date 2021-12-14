@@ -14,7 +14,7 @@ def add_nodes(fig, points, func, name, color, size, hover_template="(%{x}, %{y})
         marker=dict(color=color, size=size),
         row=row,
         col=col,
-        showlegend=showlegend
+        showlegend=showlegend,
     )
 
 
