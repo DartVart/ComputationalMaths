@@ -11,7 +11,7 @@ class GaussQF:
     standard_line_segment = LineSegment(-1, 1)
 
     def __init__(self, accuracy=1e-12):
-        self._standard_lejandr_polynomials = [1, custom_parse_expr("x")]  # None for nodes_count = 0 and = 1
+        self._standard_lejandr_polynomials = [1, custom_parse_expr("x")]
         self._standard_nodes = self.get_initial_standard_nodes()
         self._standard_coefficients = self.get_initial_standard_coefficients()
         self._solver = RootCalculator(SecantLineSolver())
@@ -39,9 +39,12 @@ class GaussQF:
 
     def get_nodes_in_standard_line_segment(self, nodes_count: int) -> List[float]:
         if nodes_count not in self._standard_nodes:
-            nodes = self._solver.find_roots(self.get_standard_lejandr_polynomial(nodes_count),
-                                            self.standard_line_segment,
-                                            self._accuracy, int(self.standard_line_segment.length // 0.001))
+            nodes = self._solver.find_roots(
+                self.get_standard_lejandr_polynomial(nodes_count),
+                self.standard_line_segment,
+                self._accuracy,
+                int(self.standard_line_segment.length // 0.001),
+            )
             self._standard_nodes[nodes_count] = nodes
         return self._standard_nodes[nodes_count]
 
@@ -49,8 +52,8 @@ class GaussQF:
         last_calculated_nodes_count = len(self._standard_lejandr_polynomials) - 1
         for i in range(last_calculated_nodes_count + 1, nodes_count + 1):
             new_polynomial = (float(2 * i - 1) / i) * self._standard_lejandr_polynomials[-1] * custom_parse_expr(
-                "x") - (
-                                     float(i - 1) / i) * self._standard_lejandr_polynomials[-2]
+                "x"
+            ) - (float(i - 1) / i) * self._standard_lejandr_polynomials[-2]
             self._standard_lejandr_polynomials.append(new_polynomial)
 
     def get_standard_lejandr_polynomial(self, nodes_count: int):
@@ -72,8 +75,10 @@ class GaussQF:
 
     def get_nodes(self, line_segment: LineSegment, nodes_count) -> List[float]:
         ratio = line_segment.length / self.standard_line_segment.length
-        return [(line_segment.left + ratio * (standard_node - self.standard_line_segment.left)) for standard_node in
-                self.get_nodes_in_standard_line_segment(nodes_count)]
+        return [
+            (line_segment.left + ratio * (standard_node - self.standard_line_segment.left))
+            for standard_node in self.get_nodes_in_standard_line_segment(nodes_count)
+        ]
 
     def get_coefficients(self, line_segment: LineSegment, nodes_count):
         ratio = line_segment.length / self.standard_line_segment.length
@@ -83,8 +88,9 @@ class GaussQF:
         """The values of the function must be calculated in the corresponding nodes of the Gaussian QF."""
 
         nodes_count = len(function_values)
-        return sum(coef * value for coef, value in
-                   zip(self.get_coefficients(line_segment, nodes_count), function_values))
+        return sum(
+            coef * value for coef, value in zip(self.get_coefficients(line_segment, nodes_count), function_values)
+        )
 
     def get_function_values(self, function, line_segment: LineSegment, nodes_count):
         lambda_function = get_lambda_func(function)

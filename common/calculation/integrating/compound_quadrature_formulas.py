@@ -1,5 +1,11 @@
-from common.calculation.integrating.quadrature_formulas import LeftRectangleQuadFormula, RightRectangleQuadFormula, \
-    MiddleRectangleQuadFormula, TrapezeQuadFormula, SimpsonQuadFormula, ThreeFractionsOfEightQuadFormula
+from common.calculation.integrating.quadrature_formulas import (
+    LeftRectangleQuadFormula,
+    RightRectangleQuadFormula,
+    MiddleRectangleQuadFormula,
+    TrapezeQuadFormula,
+    SimpsonQuadFormula,
+    ThreeFractionsOfEightQuadFormula,
+)
 from common.models.line_segment import LineSegment
 from common.models.point_generation import EquidistantPointGenerator
 
@@ -34,8 +40,7 @@ def get_all_errors(single_quad_formula, derivative_modulo_max, line_segment, par
     points = point_generator.generate(line_segment, partition_count + 1)
     error = 0
     for i in range(len(points) - 1):
-        error += single_quad_formula.get_theoretical_error(derivative_modulo_max,
-                                                           LineSegment(points[i], points[i + 1]))
+        error += single_quad_formula.get_theoretical_error(derivative_modulo_max, LineSegment(points[i], points[i + 1]))
     return error
 
 
@@ -92,11 +97,11 @@ class TrapezesFormula:
 
     @staticmethod
     def calculate(
-            function,
-            line_segment: LineSegment,
-            partition_count,
-            sum_at_extremes: float = None,
-            sum_in_middle_nodes: float = None,
+        function,
+        line_segment: LineSegment,
+        partition_count,
+        sum_at_extremes: float = None,
+        sum_in_middle_nodes: float = None,
     ):
         h = line_segment.length / partition_count
         if sum_in_middle_nodes is None:
@@ -116,12 +121,12 @@ class SimpsonFormula:
 
     @staticmethod
     def calculate(
-            function,
-            line_segment: LineSegment,
-            partition_count,
-            sum_at_extremes: float = None,
-            sum_in_middle_nodes: float = None,
-            sum_in_middle_of_segments: float = None,
+        function,
+        line_segment: LineSegment,
+        partition_count,
+        sum_at_extremes: float = None,
+        sum_in_middle_nodes: float = None,
+        sum_in_middle_of_segments: float = None,
     ):
         h = line_segment.length / partition_count
         if sum_in_middle_nodes is None:
@@ -150,10 +155,10 @@ class ThreeFractionsOfEightFormula:
         second_sum = 0
         current_node = line_segment.left
         for i in range(partition_count - 1):
-            first_sum += (function(current_node + one_third_of_h) + function(current_node + two_third_of_h))
+            first_sum += function(current_node + one_third_of_h) + function(current_node + two_third_of_h)
             current_node += h
             second_sum += function(current_node)
-        first_sum += (function(current_node + one_third_of_h) + function(current_node + two_third_of_h))
+        first_sum += function(current_node + one_third_of_h) + function(current_node + two_third_of_h)
         return h * (function(line_segment.left) + function(line_segment.right) + 3 * first_sum + 2 * second_sum) / 8
 
     @staticmethod

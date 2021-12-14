@@ -38,7 +38,7 @@ class MelerQF:
         return pi / nodes_count
 
     def get_approx_integral(self, function_values: List[float]):
-        """The values of the function must be calculated in the corresponding nodes of the Gaussian QF."""
+        """The values of the function must be calculated in the corresponding nodes of the Meler QF."""
 
         return sum(function_values) * self.get_coefficient(len(function_values))
 

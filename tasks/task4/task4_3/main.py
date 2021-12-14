@@ -3,14 +3,28 @@ import sys
 sys.path.append("")
 sys.path.append("../../..")
 
-from common.calculation.integrating.compound_quadrature_formulas import get_sum_in_middle_nodes, \
-    get_sum_in_middle_of_segments, get_sum_at_extremes, RightRectanglesFormula, LeftRectanglesFormula, \
-    MiddleRectanglesFormula, TrapezesFormula, SimpsonFormula, ThreeFractionsOfEightFormula
+from common.calculation.integrating.compound_quadrature_formulas import (
+    get_sum_in_middle_nodes,
+    get_sum_in_middle_of_segments,
+    get_sum_at_extremes,
+    RightRectanglesFormula,
+    LeftRectanglesFormula,
+    MiddleRectanglesFormula,
+    TrapezesFormula,
+    SimpsonFormula,
+    ThreeFractionsOfEightFormula,
+)
 from sympy import integrate, lambdify
 import streamlit as st
 from common.models.line_segment import LineSegment
-from tasks.utils.streamlit import set_initial_key, display_whitespace, display_title, get_new_key, \
-    input_line_segment, input_sympy_function
+from tasks.utils.streamlit import (
+    set_initial_key,
+    display_whitespace,
+    display_title,
+    get_new_key,
+    input_line_segment,
+    input_sympy_function,
+)
 from common.calculation.interpolation.interpolators.newton_interpolator import NewtonInterpolator
 
 INTERPOLATOR = NewtonInterpolator()
@@ -23,7 +37,7 @@ QUADRATURES = {
     "Формула средних прямоугольников": MiddleRectanglesFormula(),
     "Формула трапеций": TrapezesFormula(),
     "Формула Симпсона": SimpsonFormula(),
-    "Формула 3/8": ThreeFractionsOfEightFormula()
+    "Формула 3/8": ThreeFractionsOfEightFormula(),
 }
 
 
@@ -42,19 +56,18 @@ def display_result(line_segment: LineSegment, partition_count, addition_partitio
     st.markdown(rf"""{LINE_START} $h = {line_segment.length / partition_count}$""")
     st.markdown(rf"""{LINE_START} $h / l = {line_segment.length / bigger_partition_count}$""")
 
-
     h_additional_params = get_additional_params(function, line_segment, partition_count)
     h_l_additional_params = get_additional_params(function, line_segment, bigger_partition_count)
     for quadrature_name in QUADRATURES:
         quadrature = QUADRATURES[quadrature_name]
-        h_approx = quadrature.calculate(function, line_segment, partition_count,
-                                        *h_additional_params[quadrature_name])
+        h_approx = quadrature.calculate(function, line_segment, partition_count, *h_additional_params[quadrature_name])
 
-        h_l_approx = quadrature.calculate(function, line_segment,
-                                          bigger_partition_count,
-                                          *h_l_additional_params[quadrature_name])
-        runge_approx = get_integral_with_runge_law(h_approx, h_l_approx, addition_partition_count,
-                                                   quadrature.algebraic_precision + 1)
+        h_l_approx = quadrature.calculate(
+            function, line_segment, bigger_partition_count, *h_l_additional_params[quadrature_name]
+        )
+        runge_approx = get_integral_with_runge_law(
+            h_approx, h_l_approx, addition_partition_count, quadrature.algebraic_precision + 1
+        )
         display_title(st, quadrature_name, 3)
         st.markdown(rf"""{LINE_START} $J(h) = {h_approx}$""")
         st.markdown(rf"""{LINE_START} $J(h/l) = {h_l_approx}$""")
@@ -75,7 +88,7 @@ def get_additional_params(function, line_segment, partition_count):
         "Формула средних прямоугольников": [sum_in_middle_of_segments],
         "Формула трапеций": [sum_at_extremes, sum_in_middle_nodes],
         "Формула Симпсона": [sum_at_extremes, sum_in_middle_nodes, sum_in_middle_of_segments],
-        "Формула 3/8": []
+        "Формула 3/8": [],
     }
 
 
@@ -98,10 +111,18 @@ def main():
 
     partition_col1, partition_col2 = st.columns(2)
     partition_count = partition_col1.number_input(
-        "На сколько частей разбивать отрезок", value=5, step=1, format="%i", min_value=1,
+        "На сколько частей разбивать отрезок",
+        value=5,
+        step=1,
+        format="%i",
+        min_value=1,
     )
     addition_partition_count = partition_col2.number_input(
-        "Множитель l", value=2, step=1, format="%i", min_value=1,
+        "Множитель l",
+        value=2,
+        step=1,
+        format="%i",
+        min_value=1,
     )
 
     display_result(line_segment, partition_count, addition_partition_count, sympy_function=sympy_function)

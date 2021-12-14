@@ -4,9 +4,17 @@ import sys
 sys.path.append("")
 sys.path.append("../../..")
 
-from common.calculation.integrating.compound_quadrature_formulas import get_sum_in_middle_nodes, \
-    get_sum_in_middle_of_segments, get_sum_at_extremes, RightRectanglesFormula, LeftRectanglesFormula, \
-    MiddleRectanglesFormula, TrapezesFormula, SimpsonFormula, ThreeFractionsOfEightFormula
+from common.calculation.integrating.compound_quadrature_formulas import (
+    get_sum_in_middle_nodes,
+    get_sum_in_middle_of_segments,
+    get_sum_at_extremes,
+    RightRectanglesFormula,
+    LeftRectanglesFormula,
+    MiddleRectanglesFormula,
+    TrapezesFormula,
+    SimpsonFormula,
+    ThreeFractionsOfEightFormula,
+)
 from common.models.point_generation import EquidistantPointGenerator
 from sympy import integrate, lambdify
 import streamlit as st
@@ -17,8 +25,14 @@ import numpy as np
 from config import COLORS
 from common.models.line_segment import LineSegment
 from tasks.utils.expression_parsing import custom_parse_expr
-from tasks.utils.streamlit import set_initial_key, display_whitespace, display_title, get_new_key, \
-    input_line_segment, input_sympy_function
+from tasks.utils.streamlit import (
+    set_initial_key,
+    display_whitespace,
+    display_title,
+    get_new_key,
+    input_line_segment,
+    input_sympy_function,
+)
 from common.calculation.interpolation.interpolators.newton_interpolator import NewtonInterpolator
 from tasks.utils.plotly import add_line, add_nodes
 
@@ -32,7 +46,7 @@ QUADRATURES = {
     "Формула средних прямоугольников": MiddleRectanglesFormula(),
     "Формула трапеций": TrapezesFormula(),
     "Формула Симпсона": SimpsonFormula(),
-    "Формула 3/8": ThreeFractionsOfEightFormula()
+    "Формула 3/8": ThreeFractionsOfEightFormula(),
 }
 
 
@@ -64,42 +78,42 @@ def get_modulo_max_in_extreme_points(func):
 
 FUNCTIONS = {
     "cos(x)": {
-        "sympy": custom_parse_expr('cos(x)'),
+        "sympy": custom_parse_expr("cos(x)"),
         "1_der_max": sin_modulo_max,
         "2_der_max": cos_modulo_max,
         "3_der_max": sin_modulo_max,
         "4_der_max": cos_modulo_max,
     },
     "10 (константа)": {
-        "sympy": custom_parse_expr('10 + x*0'),
+        "sympy": custom_parse_expr("10 + x*0"),
         "1_der_max": zero_func,
         "2_der_max": zero_func,
         "3_der_max": zero_func,
         "4_der_max": zero_func,
     },
     "3x + 1": {
-        "sympy": custom_parse_expr('3*x + 1'),
+        "sympy": custom_parse_expr("3*x + 1"),
         "1_der_max": lambda x: 3,
         "2_der_max": zero_func,
         "3_der_max": zero_func,
         "4_der_max": zero_func,
     },
     "2x^2 + x + 1": {
-        "sympy": custom_parse_expr('2 * (x ** 2) + x + 1'),
+        "sympy": custom_parse_expr("2 * (x ** 2) + x + 1"),
         "1_der_max": get_modulo_max_in_extreme_points(lambda x: 4 * x + 1),
         "2_der_max": lambda x: 4,
         "3_der_max": zero_func,
         "4_der_max": zero_func,
     },
     "3x^3 - x^2 + x + 1": {
-        "sympy": custom_parse_expr('3 * (x ** 3) - (x ** 2) + x + 1'),
+        "sympy": custom_parse_expr("3 * (x ** 3) - (x ** 2) + x + 1"),
         "1_der_max": get_modulo_max_in_extreme_points(lambda x: 9 * (x ** 2) - 2 * x + 1),
         "2_der_max": get_modulo_max_in_extreme_points(lambda x: 18 * x - 2),
         "3_der_max": lambda x: 18,
         "4_der_max": zero_func,
     },
     "E^(3*x)": {
-        "sympy": custom_parse_expr('E^(3*x)'),
+        "sympy": custom_parse_expr("E^(3*x)"),
         "1_der_max": get_modulo_max_in_extreme_points(lambda x: 3 * (math.e ** (3 * x))),
         "2_der_max": get_modulo_max_in_extreme_points(lambda x: 9 * (math.e ** (3 * x))),
         "3_der_max": get_modulo_max_in_extreme_points(lambda x: 27 * (math.e ** (3 * x))),
@@ -119,9 +133,9 @@ def add_area_part(fig, line_segment, quad_name, function, index):
         y=[0] + [function(point) for point in points_for_quadrature] + [0, 0],
         line_width=0,
         line=dict(color=COLORS["dark_blue"]),
-        fill='toself',
+        fill="toself",
         opacity=0.15,
-        showlegend=False
+        showlegend=False,
     )
 
     x = [x0, x0, x1, x1, x0]
@@ -152,19 +166,18 @@ def add_area_part(fig, line_segment, quad_name, function, index):
         y = [0] + cubic_values + [0, 0]
 
     fig.add_scatter(
-        legendgroup='area',
+        legendgroup="area",
         x=x,
         y=y,
         mode="lines",
         line=dict(color=COLORS["dark_red"]),
-        fill='toself',
+        fill="toself",
         opacity=0.6,
         name="proximity of area",
-        showlegend=(index == 0)
+        showlegend=(index == 0),
     )
 
-    add_nodes(fig, additional_points, function, "function values",
-              COLORS['theme_color'], 7.5, showlegend=(index == 0))
+    add_nodes(fig, additional_points, function, "function values", COLORS["theme_color"], 7.5, showlegend=(index == 0))
 
 
 def display_graph(function, line_segment: LineSegment, quad_name, partition_count):
@@ -181,28 +194,30 @@ def display_graph(function, line_segment: LineSegment, quad_name, partition_coun
     min_y = min(func_calculate_height_points + [0])
     additional_height = (max_y - min_y) * 0.1
 
-    add_line(fig, points_for_function, function, "function", COLORS['dark_blue'])
+    add_line(fig, points_for_function, function, "function", COLORS["dark_blue"])
 
     point_generator = EquidistantPointGenerator()
     points_for_quadratures = point_generator.generate(line_segment, partition_count + 1)
     for i in range(len(points_for_quadratures) - 1):
-        add_area_part(fig, LineSegment(points_for_quadratures[i], points_for_quadratures[i + 1]), quad_name, function,
-                      i)
+        add_area_part(
+            fig, LineSegment(points_for_quadratures[i], points_for_quadratures[i + 1]), quad_name, function, i
+        )
 
     fig.update_layout(margin=dict(l=20, t=40, b=20, r=0))
     fig.update_xaxes(range=[x0 - additional_value / 6, x1 + additional_value / 6])
     fig.update_yaxes(range=[min_y - additional_height, max_y + additional_height])
-    fig.update_layout(template='none')
+    fig.update_layout(template="none")
     with st.expander("Графиеческое представление", expanded=True):
         st.plotly_chart(fig, use_container_width=True)
 
 
-def display_result(line_segment: LineSegment, partition_count, need_to_show_graphs, function_name=None,
-                   sympy_function=None):
+def display_result(
+    line_segment: LineSegment, partition_count, need_to_show_graphs, function_name=None, sympy_function=None
+):
     display_title(st, "Результат", 2)
 
     if function_name:
-        sympy_function = FUNCTIONS[function_name]['sympy']
+        sympy_function = FUNCTIONS[function_name]["sympy"]
     function = lambdify("x", sympy_function)
 
     try:
@@ -223,11 +238,12 @@ def display_result(line_segment: LineSegment, partition_count, need_to_show_grap
         "Формула средних прямоугольников": [sum_in_middle_of_segments],
         "Формула трапеций": [sum_at_extremes, sum_in_middle_nodes],
         "Формула Симпсона": [sum_at_extremes, sum_in_middle_nodes, sum_in_middle_of_segments],
-        "Формула 3/8": []
+        "Формула 3/8": [],
     }
     for quadrature_name in QUADRATURES:
-        approximate_integral = QUADRATURES[quadrature_name].calculate(function, line_segment, partition_count,
-                                                                      *additional_params[quadrature_name])
+        approximate_integral = QUADRATURES[quadrature_name].calculate(
+            function, line_segment, partition_count, *additional_params[quadrature_name]
+        )
         display_title(st, quadrature_name, 3)
 
         if need_to_show_graphs:
@@ -235,7 +251,8 @@ def display_result(line_segment: LineSegment, partition_count, need_to_show_grap
 
         st.markdown(rf"""{LINE_START} Приближенное значение интеграла $J_{{approx}} = {approximate_integral}$""")
         st.markdown(
-            rf"""{LINE_START} Абсолютная фактическая погрешность $|J_{{approx}} - J_{{real}}| = {abs(approximate_integral - real_integral_value)}$""")
+            rf"""{LINE_START} Абсолютная фактическая погрешность $|J_{{approx}} - J_{{real}}| = {abs(approximate_integral - real_integral_value)}$"""
+        )
 
         if function_name:
             if quadrature_name in ("Формула левых прямоугольников", "Формула правых прямоугольников"):
@@ -246,9 +263,13 @@ def display_result(line_segment: LineSegment, partition_count, need_to_show_grap
                 derivative_key = "4_der_max"
             else:
                 derivative_key = None
-            theoretical_error = QUADRATURES[quadrature_name].get_theoretical_error(
-                FUNCTIONS[function_name][derivative_key](line_segment), line_segment,
-                partition_count) if derivative_key else "not \ implemented"
+            theoretical_error = (
+                QUADRATURES[quadrature_name].get_theoretical_error(
+                    FUNCTIONS[function_name][derivative_key](line_segment), line_segment, partition_count
+                )
+                if derivative_key
+                else "not \ implemented"
+            )
             st.markdown(rf"""{LINE_START} Теоретическая погрешность: ${theoretical_error}$""")
 
 
@@ -258,9 +279,10 @@ def main():
     display_title(st, "Приближенное вычисление интеграла по квадратурным формулам")
     display_whitespace(st)
 
-    function_choose_mode = st.radio("Выберите способ ввода функции",
-                                    ("Выбрать из списка (с теоретической погрешностью)",
-                                     "Ввести самому (без теоретической погрешности)"))
+    function_choose_mode = st.radio(
+        "Выберите способ ввода функции",
+        ("Выбрать из списка (с теоретической погрешностью)", "Ввести самому (без теоретической погрешности)"),
+    )
     function_name = None
     sympy_function = None
     if function_choose_mode == "Выбрать из списка (с теоретической погрешностью)":
@@ -271,11 +293,16 @@ def main():
     col1, col2, col3 = st.columns((0.3, 0.3, 0.4))
     line_segment = input_line_segment((col1, col2), (get_new_key(st), get_new_key(st)))
     partition_count = col3.number_input(
-        "На сколько частей разбивать отрезок", value=1, step=1, format="%i", min_value=1,
+        "На сколько частей разбивать отрезок",
+        value=1,
+        step=1,
+        format="%i",
+        min_value=1,
     )
     need_to_show_graphs = st.checkbox("Рисовать графики", value=True)
-    display_result(line_segment, partition_count, need_to_show_graphs, function_name=function_name,
-                   sympy_function=sympy_function)
+    display_result(
+        line_segment, partition_count, need_to_show_graphs, function_name=function_name, sympy_function=sympy_function
+    )
 
 
 if __name__ == "__main__":
