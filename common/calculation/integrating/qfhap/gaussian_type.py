@@ -46,14 +46,3 @@ class GaussianTypeQF:
     @staticmethod
     def integrate(function_values, coefficients):
         return sum(function_val * coefficients[i] for i, function_val in enumerate(function_values))
-
-
-if __name__ == "__main__":
-    g = GaussianTypeQF()
-    f = custom_parse_expr("sin(x)")
-    moments_ = g.get_moments(custom_parse_expr("sqrt(x)"), LineSegment(0.0, 1.0), 5)
-    c = g.get_orthogonal_poly_coefficients(moments_)
-    nodes_ = g.find_nodes(c)
-    coefficients_ = g.find_coefficients(nodes_, moments_)
-    f_v = g.get_function_values(f, nodes_)
-    print(g.integrate(f_v, coefficients_))

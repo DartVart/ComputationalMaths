@@ -34,14 +34,3 @@ class CompoundGaussQF:
             * h
             / 2
         )
-
-
-# if __name__ == '__main__':
-#     g = CompoundGaussQF()
-#     f = custom_parse_expr("sin(x) * sqrt(x)")
-#     l = LineSegment(0, 1)
-#     m = 10
-#     f_vals = g.get_function_values(f, l, 5, m)
-#     print(g.integrate(f_vals, l, 5, m))
-#     print(g.stat['standard_nodes'])
-#     print(g.stat['standard_coefficients'])
