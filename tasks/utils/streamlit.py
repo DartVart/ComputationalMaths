@@ -25,8 +25,8 @@ def input_function(st, initial_expression: str, key):
     return lambdify("x", custom_parse_expr(expression))
 
 
-def input_sympy_function(st, initial_expression: str, key):
-    return st.text_input("Введите выражение", initial_expression, key=key)
+def input_sympy_function(st, initial_expression: str, key, message="Введите выражение"):
+    return st.text_input(message, initial_expression, key=key)
 
 
 def input_points(st, line_segment, keys: Tuple[int, int, int]):
@@ -51,8 +51,10 @@ def input_polynomial_degree(st, max_degree, value, key):
     return polynomial_degree
 
 
-def input_line_segment(columns, keys: Tuple[int, int], left_initial=0.0, right_initial=1.0):
-    left_bound = columns[0].number_input("Введите границы отрезка", step=0.1, value=left_initial, key=keys[0])
+def input_line_segment(
+    columns, keys: Tuple[int, int], left_initial=0.0, right_initial=1.0, message="Введите границы отрезка"
+):
+    left_bound = columns[0].number_input(message, step=0.1, value=left_initial, key=keys[0])
     right_bound = columns[1].number_input("", step=0.1, value=right_initial, key=keys[1])
     return LineSegment(left_bound, right_bound)
 

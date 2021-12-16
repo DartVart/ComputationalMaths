@@ -33,3 +33,8 @@ class EquidistantPointGenerator(PointGenerator):
 
     def generate(self, line_segment: LineSegment, number_of_points: int) -> List[float]:
         return line_segment.split_into_points(number_of_points)
+
+
+if __name__ == "__main__":
+    e = EquidistantPointGenerator()
+    print(e.generate(LineSegment(0, 1), 5))
