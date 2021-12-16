@@ -8,7 +8,7 @@ from sympy import integrate
 import streamlit as st
 
 from config import COLORS
-from common.calculation.integrating.qfhap.gauss import GaussQF
+from common.calculation.integrating.qfhap.gauss.gauss import GaussQF
 from common.calculation.integrating.qfhap.meler import MelerQF
 from common.models.line_segment import LineSegment
 from tasks.utils.expression_parsing import custom_parse_expr
