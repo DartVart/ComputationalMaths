@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("")
-sys.path.append("../..")
+sys.path.append("../../..")
 
 import pandas as pd
 from sympy import integrate
@@ -11,8 +11,8 @@ from config import COLORS
 from common.models.line_segment import LineSegment
 from common.calculation.integrating.qfhap.gauss.compound_gauss import CompoundGaussQF
 from common.calculation.integrating.qfhap.gaussian_type import GaussianTypeQF
-from tasks.utils.expression_parsing import custom_parse_expr
-from tasks.utils.streamlit import (
+from tasks.semester_1.utils.expression_parsing import custom_parse_expr
+from tasks.semester_1.utils.streamlit import (
     set_initial_key,
     display_whitespace,
     display_title,
@@ -20,7 +20,7 @@ from tasks.utils.streamlit import (
     input_line_segment,
     input_sympy_function,
 )
-from tasks.utils.plotly import update_figure_to_x_axis
+from tasks.semester_1.utils.plotly import update_figure_to_x_axis
 import plotly.graph_objects as go
 
 compound_gauss_qf = CompoundGaussQF()
